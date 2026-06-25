@@ -444,7 +444,7 @@ async function fetchAndDisplayData() {
 }
 
 
-// --- UPDATED fetchAllData FUNCTION ---async function fetchAllData(address) {
+async function fetchAllData(address) {
     // Referrer URL Setup
     const refUrl = `${window.location.origin}/register.html?ref=${address}`; 
     const refInput = document.getElementById('refURL');
