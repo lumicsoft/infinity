@@ -241,12 +241,25 @@ window.handleLogin = async function() {
     try {
         if (!window.ethereum) return alert("Please install Trust Wallet or MetaMask!");
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const userData = await contract.users(accounts[0]);
-        if (userData.exists === true) { localStorage.setItem('userAddress', accounts[0]); window.location.href = "index1.html"; }
-        else { alert("Not registered!"); window.location.href = "register.html"; }
-    } catch (err) { console.error("Login Error:", err); }
+        
+        // कॉन्ट्रैक्ट से डेटा फेच करें
+        const userData = await contract.getUserDetails(accounts[0]);
+        
+        // कॉन्ट्रैक्ट के अनुसार यदि userId (index 0) 0 नहीं है, तो यूजर रजिस्टर्ड है
+        const isRegistered = userData[0].toString() !== "0";
+        
+        if (isRegistered) { 
+            localStorage.setItem('userAddress', accounts[0]); 
+            window.location.href = "index1.html"; 
+        } else { 
+            alert("Not registered!"); 
+            window.location.href = "register.html"; 
+        }
+    } catch (err) { 
+        console.error("Login Error:", err); 
+        alert("Login Error: " + err.message);
+    }
 }
-
 window.handleRegister = async function() {
     const refField = document.getElementById('reg-referrer');
     const regBtn = event.target;
