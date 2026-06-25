@@ -5,34 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Income History | Infinity Global</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass-luxury { background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95)); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
-        .btn-filter { background: #1e293b; transition: 0.3s; }
-        .btn-filter:hover, .btn-filter.active { background: #6366f1; }
+        body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        .font-orbit { font-family: 'Orbitron', sans-serif; }
+        .glass-luxury { background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95)); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
+        .border-animate { position: relative; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-filter { background: #0f172a; border: 1px solid #334155; transition: 0.3s; color: #94a3b8; }
+        .btn-filter:hover, .btn-filter.active { background: #6366f1; border-color: #818cf8; color: #fff; }
     </style>
 </head>
 <body class="p-4 md:p-8">
     <div class="max-w-4xl mx-auto space-y-6">
-        <a href="index1.html" class="text-indigo-400 flex items-center gap-2 mb-4">← Back to Dashboard</a>
+        <a href="index1.html" class="text-indigo-400 flex items-center gap-2 mb-4 font-bold uppercase text-xs">← Back to Dashboard</a>
         
-        <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-bold text-yellow-500">Income History</h2>
-        </div>
+        <h2 class="font-orbit text-2xl font-bold text-yellow-500">Income History</h2>
 
         <!-- Filter Buttons -->
         <div class="flex flex-wrap gap-2">
-            <button onclick="setActive(this, 0)" class="btn-filter active px-4 py-2 rounded-lg text-xs font-bold">ALL</button>
-            <button onclick="setActive(this, 1)" class="btn-filter px-4 py-2 rounded-lg text-xs font-bold">REFERRAL</button>
-            <button onclick="setActive(this, 2)" class="btn-filter px-4 py-2 rounded-lg text-xs font-bold">ACTIVE</button>
-            <button onclick="setActive(this, 3)" class="btn-filter px-4 py-2 rounded-lg text-xs font-bold">PASSIVE</button>
-            <button onclick="setActive(this, 7)" class="btn-filter px-4 py-2 rounded-lg text-xs font-bold">SINGLE LEG</button>
+            <button onclick="setActive(this, 0)" class="btn-filter active px-4 py-2 rounded-lg text-[10px] font-bold">ALL</button>
+            <button onclick="setActive(this, 1)" class="btn-filter px-4 py-2 rounded-lg text-[10px] font-bold">REFERRAL</button>
+            <button onclick="setActive(this, 2)" class="btn-filter px-4 py-2 rounded-lg text-[10px] font-bold">ACTIVE</button>
+            <button onclick="setActive(this, 3)" class="btn-filter px-4 py-2 rounded-lg text-[10px] font-bold">PASSIVE</button>
+            <button onclick="setActive(this, 7)" class="btn-filter px-4 py-2 rounded-lg text-[10px] font-bold">SINGLE LEG</button>
         </div>
         
-        <div class="glass-luxury p-6">
+        <div class="glass-luxury p-6 border-animate">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm text-gray-400">
-                    <thead class="text-xs uppercase text-yellow-500 border-b border-slate-700">
+                    <thead class="text-[10px] uppercase text-yellow-500 border-b border-slate-700">
                         <tr>
                             <th class="py-3 px-2">Type</th>
                             <th class="py-3 px-2">Amount</th>
@@ -46,16 +47,19 @@
             </div>
         </div>
     </div>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="components.js"></script>
     <script src="web3-handler.js"></script>
     <script>
         function setActive(btn, type) {
             document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            filterHistory(type);
+            if(window.filterHistory) window.filterHistory(type);
         }
-        window.addEventListener('load', loadHistory);
+        window.addEventListener('load', async () => {
+            if(window.loadHistory) await window.loadHistory();
+        });
     </script>
 </body>
 </html>
