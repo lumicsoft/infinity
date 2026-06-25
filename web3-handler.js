@@ -130,50 +130,34 @@ async function init() {
     }
 }
 // --- CORE LOGIC ---
-window.handleDeposit = async function(withBurn) {
-    const amountInput = document.getElementById('deposit-amount');
-    const depositBtn = event.target; // Jo button click hua hai
-    
-    if (!amountInput || !amountInput.value || parseFloat(amountInput.value) < 100) {
-        return alert("Min 100 BLX required!");
-    }
-
+window.loadIncomeHistory = async function() {
     try {
-        let activeSigner = window.signer || provider.getSigner();
-        let activeContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, activeSigner);
+        const userAddress = await window.signer.getAddress();
+        const report = await window.contract.getUserIncomeReport(userAddress);
+        const tbody = document.getElementById('historyBody');
+        if (!tbody) return; // अगर history.html पेज नहीं है तो रुक जाएं
 
-        depositBtn.disabled = true;
-        depositBtn.innerText = "APPROVING...";
+        tbody.innerHTML = "";
+        
+        // बोनस टाइप्स के नाम
+        const typeNames = ["", "Referral", "Active Orbit", "Passive Orbit", "Passive Gift", "Team Gift", "Direct Gift", "Single Leg", "", "", "Withdrawal"];
 
-        const amountInWei = ethers.utils.parseUnits(amountInput.value.toString(), 18);
-        const blxToken = new ethers.Contract(BLX_TOKEN_ADDRESS, ERC20_ABI, activeSigner);
+        // डेटा उल्टा दिखाएं ताकि नया बोनस ऊपर दिखे (i = report.timestamps.length - 1)
+        for (let i = report.timestamps.length - 1; i >= 0; i--) {
+            const time = new Date(report.timestamps[i] * 1000).toLocaleString();
+            const amount = ethers.utils.formatEther(report.amounts[i]);
+            const type = typeNames[report.types[i]] || "Others";
 
-        // 1. Approval Step
-        const allowance = await blxToken.allowance(await activeSigner.getAddress(), CONTRACT_ADDRESS);
-        if (allowance.lt(amountInWei)) {
-            const approveTx = await blxToken.approve(CONTRACT_ADDRESS, amountInWei);
-            await approveTx.wait();
+            tbody.innerHTML += `
+                <tr class="border-b border-slate-700">
+                    <td class="py-3 px-2 text-white">${type}</td>
+                    <td class="py-3 px-2 text-emerald-400 font-bold">${parseFloat(amount).toFixed(2)} USDT</td>
+                    <td class="py-3 px-2 text-gray-400 text-xs">${time}</td>
+                </tr>
+            `;
         }
-
-        depositBtn.innerText = "SIGNING...";
-
-        // 2. Stake Step: yahan 'withBurn' dynamic parameter use ho raha hai
-        // stake(uint256 amount, bool withBurn)
-        const depositGas = await activeContract.estimateGas.stake(amountInWei, withBurn);
-        const tx = await activeContract.stake(amountInWei, withBurn, { 
-            gasLimit: depositGas.mul(150).div(100) 
-        });
-        
-        depositBtn.innerText = withBurn ? "BURNING & STAKING..." : "STAKING...";
-        await tx.wait();
-        
-        alert(withBurn ? "Stake with Burn Successful!" : "Stake Successful!");
-        location.reload(); 
     } catch (err) {
-        console.error("Deposit Error:", err);
-        alert("Error: " + (err.data?.message || err.message || "Transaction Failed"));
-        depositBtn.innerText = withBurn ? "STAKE WITH BURN" : "STAKE WITHOUT BURN";
-        depositBtn.disabled = false;
+        console.error("History Load Error:", err);
     }
 }
 window.handleUpgrade = async function(packageIds) {
