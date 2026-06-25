@@ -278,6 +278,12 @@ window.handleLogout = function() {
     if (confirm("Disconnect and Logout?")) { localStorage.clear(); window.location.href = "index.html"; }
 }
 
+function updateNavbar(address) {
+    const navAddr = document.getElementById('connect-btn');
+    if(navAddr) navAddr.innerText = address.substring(0, 6) + "..." + address.substring(38);
+}
+
+
 function showLogoutIcon(address) {
     const btn = document.getElementById('connect-btn');
     const logout = document.getElementById('logout-icon-btn');
