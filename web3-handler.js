@@ -177,38 +177,44 @@ window.handleDeposit = async function(withBurn) {
 }
 window.handleUpgrade = async function(packageIds) {
     try {
-        if (!window.contract) return alert("Contract not initialized!");
+        if (!window.contract || !window.signer) return alert("Wallet not connected!");
 
         const btn = event.target;
-        const originalText = btn.innerText;
         btn.disabled = true;
-        btn.innerText = "ESTIMATING...";
+        btn.innerText = "APPROVING...";
 
-        // 1. डायनामिक गैस एस्टिमेशन
-        // हम कॉन्ट्रैक्ट को कॉल करके गैस का अंदाज़ा लगाते हैं
-        const estimatedGas = await window.contract.estimateGas.reTopup(packageIds);
+        // 1. पैकेज प्राइस निकालें (इंडेक्स 0 मतलब पहला पैकेज)
+        // ध्यान दें: आपके HTML में index 0 से 9 है
+        const pid = packageIds[0];
+        const price = [21, 42, 84, 168, 336, 672, 1344, 2688, 5376, 10752][pid];
+        const amountInWei = ethers.utils.parseEther(price.toString());
+
+        // 2. USDT कॉन्ट्रैक्ट के साथ अप्रूवल
+        const usdtContract = new ethers.Contract(BLX_TOKEN_ADDRESS, ERC20_ABI, window.signer);
         
-        // 2. 30% बफर के साथ गैस लिमिट कैलकुलेट करें
-        // (estimatedGas * 1.3)
+        // पहले चेक करें कि क्या पर्याप्त allowance है
+        const allowance = await usdtContract.allowance(await window.signer.getAddress(), CONTRACT_ADDRESS);
+        
+        if (allowance.lt(amountInWei)) {
+            const approveTx = await usdtContract.approve(CONTRACT_ADDRESS, amountInWei);
+            btn.innerText = "WAITING FOR APPROVAL...";
+            await approveTx.wait();
+        }
+
+        // 3. अब reTopup कॉल करें
+        btn.innerText = "UPGRADING...";
+        const estimatedGas = await window.contract.estimateGas.reTopup(packageIds);
         const gasLimit = estimatedGas.mul(130).div(100);
 
-        btn.innerText = "UPGRADING...";
-
-        // 3. ट्रांजेक्शन भेजें
-        const tx = await window.contract.reTopup(packageIds, { 
-            gasLimit: gasLimit 
-        });
-
-        console.log("Transaction sent:", tx.hash);
-        await tx.wait(); 
+        const tx = await window.contract.reTopup(packageIds, { gasLimit: gasLimit });
+        await tx.wait();
 
         alert("Package Upgraded Successfully!");
         location.reload(); 
         
     } catch (err) {
         console.error("Upgrade Error:", err);
-        // अगर गैस की वजह से एरर आता है, तो वो यहाँ दिखेगा
-        alert("Upgrade failed: " + (err.data?.message || err.message));
+        alert("Upgrade failed: " + (err.reason || err.message));
         event.target.disabled = false;
         event.target.innerText = "UPGRADE";
     }
