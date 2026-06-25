@@ -444,60 +444,64 @@ async function fetchAndDisplayData() {
 }
 
 
-// --- UPDATED fetchAllData FUNCTION ---
-async function fetchAllData(address) {
+// --- UPDATED fetchAllData FUNCTION ---async function fetchAllData(address) {
+    // Referrer URL Setup
     const refUrl = `${window.location.origin}/register.html?ref=${address}`; 
     const refInput = document.getElementById('refURL');
     if(refInput) refInput.value = refUrl;
     
     // Address display fix
     const addrDisplay = document.getElementById('user-address');
-    if(addrDisplay) addrDisplay.innerText = address;
+    if(addrDisplay) addrDisplay.innerText = address.substring(0, 6) + "..." + address.substring(38);
     
     try {
-        // 1. getUserStats (returns: roi, level, referral, reward, teamShare, teamCount, rank)
-        const stats = await contract.getUserStats(address); 
+        // 1. User Details Fetch
+        const user = await contract.getUserDetails(address); 
         
-        // 2. User main data call
-        const userData = await contract.users(address);
+        // 2. Bonus Wallet Fetch
+        const bonus = await contract.userBonusUSDTWallet(address);
 
         // --- Dashboard UI Mapping ---
 
-        // Revenue Stats (From stats array)
-        updateText('roi-earning', format(stats[0]));        // ROI Income
-        updateText('level-earning', format(stats[1]));      // Team Bonus (Renamed Level Income)
-        updateText('referral-bonus', format(stats[2]));     // Referral Bonus
-        updateText('rank-earning', format(stats[3]));       // Reward Bonus (Renamed Reward)
-        updateText('team-profit-share', format(stats[4]));  // Team Profit Share Bonus (New)
+        // Stats Box
+        updateText('total-deposit', format(user[3]));         // totalSelfPurchasing
+        updateText('total-earned', format(bonus[3]));        // totalCreditedBonus
+        updateText('total-withdrawn', format(bonus[6]));     // totalWithdrawalBonus
+        updateText('team-count', user[8] ? user[8].toString() : "0");        // noOfTotalTeam
+        updateText('directs-count', user[7] ? user[7].toString() : "0");     // totalDirect
         
-        // Dashboard Stats Box Mapping
-        updateText('total-deposit', format(userData.totalStaked));
-        updateText('total-earned', format(userData.totalIncome));
-        updateText('total-withdrawn', format(userData.totalWithdrawn));
-        updateText('team-count', stats[5].toString());
-        updateText('directs-count', userData.activeDirects.toString());
+        // Income Details
+        updateText('intro-earning', format(bonus[0]));       // referralBonus
+        updateText('active-earning', format(bonus[1]));      // activeorbitBonus
+        updateText('passive-earning', format(bonus[2]));     // passiveorbitBonus
+        updateText('global-earning', format(bonus[11]));     // globalGiftBonus
+        updateText('skipped-earning', format(bonus[5]));     // totalSkippedBonus
+        updateText('direct-gift', format(bonus[8]));         // directWorkGiftBonus
+        updateText('team-gift', format(bonus[9]));           // teamWorkGiftBonus
         
-        // Dynamic Rank Display
-        updateText('rank-display', stats[6].toString());
-        
-        // Withdrawable Balance (Available = Total Income - Total Withdrawn)
-        const withdrawable = userData.totalIncome.sub(userData.totalWithdrawn);
-        updateText('compounding-balance', format(withdrawable));
-        updateText('withdraw-balance-display', format(withdrawable));
-        updateText('cap-balance', format(withdrawable));
-
-        // Active Deposit for Compound Power
-        updateText('active-deposit', format(userData.totalStaked));
-        updateText('active-deposit-cp', format(userData.totalStaked));
+        // Withdrawable Balance
+        updateText('available-balance', format(bonus[4]));   // totalAvailableBonus
+        updateText('withdraw-balance-display', format(bonus[4]));
 
     } catch (err) { 
         console.error("Data Sync Error:", err); 
     }
 }
 
-// Ensure ki 'format' function ethers.utils ka use kar raha ho
-const format = (val) => val ? parseFloat(ethers.utils.formatUnits(val, 18)).toFixed(2) : "0.00";
-const updateText = (id, val) => document.querySelectorAll(`[id="${id}"]`).forEach(el => el.innerText = val);
-function updateNavbar(addr) { const btn = document.getElementById('connect-btn'); if(btn) btn.innerText = addr.substring(0,6) + "..." + addr.substring(38); }
+// Helpers - Ethers v5/v6 compatibility
+const format = (val) => {
+    try {
+        return val ? parseFloat(ethers.utils.formatEther(val.toString())).toFixed(2) : "0.00";
+    } catch (e) {
+        return "0.00";
+    }
+};
+
+const updateText = (id, val) => {
+    const elements = document.querySelectorAll(`[id="${id}"]`);
+    if (elements.length > 0) {
+        elements.forEach(el => el.innerText = val);
+    }
+};
 
 window.addEventListener('load', init);
