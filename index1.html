@@ -60,6 +60,10 @@
             </div>
         </div>
     </div>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="components.js"></script>
+    <script src="web3-handler.js"></script>
+    
 
     <script>
         lucide.createIcons();
@@ -68,6 +72,14 @@
         pkgs.forEach(p => {
             grid.innerHTML += `<button class="glass-luxury border-animate p-2 text-[10px] font-orbit font-bold hover:scale-105 transition">$${p}</button>`;
         });
+        function copyLink() {
+            const refInput = document.getElementById('refURL');
+            if(refInput.value && refInput.value !== "loading") {
+                navigator.clipboard.writeText(refInput.value);
+                alert("Referral Link Copied!");
+            }
+        }
+
     </script>
 </body>
 </html>
