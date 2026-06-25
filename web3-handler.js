@@ -175,7 +175,44 @@ window.handleDeposit = async function(withBurn) {
         depositBtn.disabled = false;
     }
 }
+window.handleUpgrade = async function(packageIds) {
+    try {
+        if (!window.contract) return alert("Contract not initialized!");
 
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "ESTIMATING...";
+
+        // 1. डायनामिक गैस एस्टिमेशन
+        // हम कॉन्ट्रैक्ट को कॉल करके गैस का अंदाज़ा लगाते हैं
+        const estimatedGas = await window.contract.estimateGas.reTopup(packageIds);
+        
+        // 2. 30% बफर के साथ गैस लिमिट कैलकुलेट करें
+        // (estimatedGas * 1.3)
+        const gasLimit = estimatedGas.mul(130).div(100);
+
+        btn.innerText = "UPGRADING...";
+
+        // 3. ट्रांजेक्शन भेजें
+        const tx = await window.contract.reTopup(packageIds, { 
+            gasLimit: gasLimit 
+        });
+
+        console.log("Transaction sent:", tx.hash);
+        await tx.wait(); 
+
+        alert("Package Upgraded Successfully!");
+        location.reload(); 
+        
+    } catch (err) {
+        console.error("Upgrade Error:", err);
+        // अगर गैस की वजह से एरर आता है, तो वो यहाँ दिखेगा
+        alert("Upgrade failed: " + (err.data?.message || err.message));
+        event.target.disabled = false;
+        event.target.innerText = "UPGRADE";
+    }
+}
 window.handleClaimROI = async function(stakeIndex = 0) {
     const claimBtn = event.target;
     try {
