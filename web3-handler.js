@@ -18,22 +18,39 @@ const RANK_DETAILS = [
 ];
 
 const CONTRACT_ABI = [
+    // --- View Functions ---
+    "function getUserDetails(address wallet) external view returns (uint256, address, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256)",
+    "function userBonusUSDTWallet(address) external view returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256)",
+    "function globalOrbitPurchaseDetails(address wallet) external view returns (bool[10], uint256[10], uint, uint)",
+    "function reward_details(address wallet) public view returns (uint256[], uint256[], uint8[], address[], uint8[], uint8[])",
+    "function getPlatformStats() public view returns (uint256, uint256, uint256)",
+    "function getTodayBonusSummary(address wallet) public view returns (uint, uint256, uint256, uint256, uint256, uint256)",
+    "function getUserActiveOrbitSlotRecycle(address user, uint slot) public view returns (uint256)",
+    "function getActiveOrbitVacentSlot(address wallet, uint packageId) public view returns (uint, uint)",
+    "function getWorkingTree(address user, uint slot) external view returns (address[])",
+    "function getFetchLevel(address user, uint slot, uint8 level) external view returns (address[])",
+    "function getActiveSlotFrom(address user, uint slot, uint cycle) external view returns (address[])",
+    "function getActiveSlotTimestamps(address user) external view returns (uint256[])",
+    "function getPassiveSlotFromTimeStamps(address user) external view returns (uint256[])",
+    "function getUsersByPackageId(uint packageId) external view returns (address[])",
+    "function getAllUserCount() public view returns (uint256)",
+    "function getTotalPassiveCycles(address wallet, uint8 packageId) public view returns (uint256)",
+    "function getPassiveCyclePositions(address wallet, uint8 packageId) public view returns (uint256[])",
+    "function getPassiveCycleData(address wallet, uint8 packageId, uint256 cycleNo) public view returns (uint256, uint256, bool, bool)",
+    "function getPassiveCycleUsers(uint8 packageId, uint256 start, uint256 end) public view returns (address[])",
+    "function userExists(address user) public view returns (bool)",
+    "function owner() public view returns (address)",
+    // --- Write Functions ---
     "function register(address referrer) external",
-    "function stake(uint256 amount, bool withBurn) external",
-    "function claimROI(uint256 stakeIndex) external",
-    "function withdraw(uint256 amount) external",
-    "function requestUnstake(uint256 stakeIndex) external",
-    "function claimUnstake(uint256 stakeIndex) external",
-    "function totalTeamBusiness(address) view returns (uint256)",
-     "function getPendingROI(address user) external view returns (uint256)",
-    "function users(address) view returns (bool exists, address referrer, uint256 totalStaked, uint256 totalIncome, uint256 totalWithdrawn, uint256 activeDirects, uint256 teamCount, string currentRank)",
-    "function getIncomeHistory(address user) external view returns(tuple(string incomeType, uint256 amount, uint256 timestamp)[])",
-    "function getUserStats(address user) external view returns(uint256 roi, uint256 level, uint256 referral, uint256 reward, uint256 teamShare, uint256 teamCount, string rank)",
-    "function getIncomeByType(address user, string incomeType) external view returns (uint256)",
-    // Naye added functions:
-    "function getTeamByLevel(address _user, uint256 _level) external view returns (address[], uint256[])",
-    "function getStakeCount(address user) external view returns (uint256)",
-    "function getStake(address user, uint256 index) external view returns (tuple(uint256 amount, uint256 startTime, uint256 totalRoiReceived, uint256 maxPayout, bool withBurn, bool active, uint256 lastClaimTime, bool unstakeRequested, uint256 unstakeRequestTime, uint256 totalEarnedFromStake))"
+    "function reTopup(uint8[] calldata packageId) external",
+    "function takeOut(uint256 takeOutAmount) external",
+    "function enrollRegister(address wallet, address referrer) external",
+    "function enrollReTopup(address wallet, uint8[] calldata packageId) external",
+    "function Process(address[] calldata wallet, uint256 amount, uint8 mode) external",
+    "function distributeBonus(tuple(address user, uint8 packageId)[] calldata wallet, uint256 amount, uint8 packageid) external",
+    "function distributeIncomeBatch(uint8 packageId, uint256 amountPerUser, uint256 startIndex, uint256 endIndex) external",
+    "function assestsAllocation(address tokencontract, address _wallet, uint _amount) external returns(bool)",
+    "function updateBonusWallet(address user, uint256 passiveOrbitBonus, uint256 totalCreditedBonus, uint256 totalSkippedBonus) external"
 ];
 const ERC20_ABI = ["function approve(address spender, uint256 amount) public returns (bool)", "function allowance(address owner, address spender) public view returns (uint256)"];
 
