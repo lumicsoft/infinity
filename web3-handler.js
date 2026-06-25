@@ -300,15 +300,23 @@ async function setupApp(address) {
     }
 
     // 2. कॉन्ट्रैक्ट डेटा और रिडायरेक्शन लॉजिक
-    const userData = await contract.users(address);
+    // यहाँ हमने contract.users के बजाय getUserDetails का उपयोग किया है
+    let userExists = false;
+    try {
+        const userData = await contract.getUserDetails(address);
+        // अगर userId (पहली वैल्यू) 0 से बड़ी है, तो यूजर मौजूद है
+        userExists = userData[0].toString() !== "0";
+    } catch (e) {
+        console.error("User check error:", e);
+    }
+
     const path = window.location.pathname;
+    console.log("User Exists in Contract:", userExists);
 
-    console.log("User Exists in Contract:", userData.exists);
-
-    if (!userData.exists && !path.includes('register.html')) {
+    if (!userExists && !path.includes('register.html')) {
         window.location.href = "register.html";
         return;
-    } else if (userData.exists && path.includes('register.html')) {
+    } else if (userExists && path.includes('register.html')) {
         window.location.href = "index1.html";
         return;
     }
