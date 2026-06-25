@@ -206,38 +206,45 @@ window.handleUpgrade = async function(packageIds) {
 }
 let allHistoryData = [];
 
-// यह फंक्शन पक्का करें कि आपके वेब3 हैंडलर में है
 window.loadHistory = async function() {
     const tbody = document.getElementById('historyBody');
-    if (!tbody) return; // अगर पेज पर टेबल नहीं है तो रुक जाएं
+    if (!tbody) return;
     
     try {
-        // 1. अगर कॉन्ट्रैक्ट नहीं है, तो पहले कनेक्ट करें
+        // 1. अगर कॉन्ट्रैक्ट लोड नहीं है, तो पहले init() चलाएं
         if (!window.contract) {
-            await window.initWeb3();
+            console.log("Contract not found, initializing...");
+            await init(); 
         }
 
-        // 2. यूजर एड्रेस लें
+        // 2. पक्का करें कि कॉन्ट्रैक्ट और साइनर तैयार हैं
+        if (!window.contract || !window.signer) {
+            throw new Error("Wallet not connected");
+        }
+
+        // 3. यूजर एड्रेस लें
         const userAddress = await window.signer.getAddress();
         
-        // 3. कॉन्ट्रैक्ट से डेटा लाएं
+        // 4. कॉन्ट्रैक्ट से डेटा लाएं
         const report = await window.contract.getUserIncomeReport(userAddress);
         
-        // 4. डेटा प्रोसेस करें
+        // 5. डेटा प्रोसेस करें (ध्यान दें: t.toNumber() की जगह t का इस्तेमाल करें अगर वह BN है)
         allHistoryData = report.timestamps.map((t, i) => ({
-            time: t.toNumber(), // पक्का करें कि यह नंबर है
+            time: typeof t.toNumber === 'function' ? t.toNumber() : Number(t),
             amount: report.amounts[i],
             type: report.types[i]
         }));
         
-        // 5. डिफ़ॉल्ट 'All' (0) दिखाएं
+        // 6. फिल्टर कॉल करें
         window.filterHistory(0);
+        
     } catch (err) {
         console.error("Load History Error:", err);
-        tbody.innerHTML = "<tr><td colspan='3' class='text-center py-10 text-red-500'>Error loading data. Connect wallet first!</td></tr>";
+        tbody.innerHTML = `<tr><td colspan='3' class='text-center py-10 text-red-500'>
+            ${err.message.includes("connected") ? "Please connect your wallet first!" : "Error loading data."}
+        </td></tr>`;
     }
 }
-
 window.filterHistory = function(filterType) {
     const tbody = document.getElementById('historyBody');
     const typeNames = ["", "Referral", "Active", "Passive", "Passive Gift", "Team Gift", "Direct Gift", "Single Leg"];
