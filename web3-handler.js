@@ -204,19 +204,54 @@ window.handleUpgrade = async function(packageIds) {
         event.target.innerText = "UPGRADE";
     }
 }
-window.handleClaimROI = async function(stakeIndex = 0) {
-    const claimBtn = event.target;
+let allHistoryData = [];
+
+window.loadHistory = async function() {
     try {
-        claimBtn.disabled = true; claimBtn.innerText = "CLAIMING...";
-        const activeContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider.getSigner());
-        const tx = await activeContract.claimROI(stakeIndex);
-        await tx.wait();
-        alert("ROI Claimed Successfully!");
-        location.reload(); 
+        // initWeb3 को कॉल करें अगर पहले से नहीं है
+        if (!window.contract) await window.initWeb3(); 
+        
+        const userAddress = await window.signer.getAddress();
+        const report = await window.contract.getUserIncomeReport(userAddress);
+        
+        allHistoryData = report.timestamps.map((t, i) => ({
+            time: t,
+            amount: report.amounts[i],
+            type: report.types[i]
+        }));
+        
+        window.filterHistory(0);
     } catch (err) {
-        alert("Claim failed: " + (err.reason || err.message));
-        claimBtn.disabled = false; claimBtn.innerText = "CLAIM ROI";
+        console.error("Error:", err);
+        document.getElementById('historyBody').innerHTML = "<tr><td colspan='3' class='text-center py-10 text-red-400'>Failed to load data</td></tr>";
     }
+}
+
+window.filterHistory = function(filterType) {
+    const tbody = document.getElementById('historyBody');
+    tbody.innerHTML = "";
+    const typeNames = ["", "Referral", "Active", "Passive", "Passive Gift", "Team Gift", "Direct Gift", "Single Leg"];
+
+    const filtered = filterType === 0 
+        ? allHistoryData 
+        : allHistoryData.filter(item => item.type === filterType);
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = "<tr><td colspan='3' class='text-center py-10'>No record found</td></tr>";
+        return;
+    }
+
+    filtered.slice().reverse().forEach(item => {
+        const time = new Date(item.time * 1000).toLocaleDateString();
+        const amount = ethers.utils.formatEther(item.amount);
+        tbody.innerHTML += `
+            <tr class="border-b border-slate-700">
+                <td class="py-3 px-2 text-white">${typeNames[item.type] || "Income"}</td>
+                <td class="py-3 px-2 text-emerald-400">${parseFloat(amount).toFixed(2)} USDT</td>
+                <td class="py-3 px-2 text-gray-400">${time}</td>
+            </tr>
+        `;
+    });
 }
 window.handleRequestUnstake = async function(stakeIndex = 0) {
     try {
