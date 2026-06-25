@@ -34,6 +34,7 @@ const CONTRACT_ABI = [
     "function getPassiveSlotFromTimeStamps(address user) external view returns (uint256[])",
     "function getUsersByPackageId(uint packageId) external view returns (address[])",
     "function getAllUserCount() public view returns (uint256)",
+     "function getUserIncomeReport(address wallet) external view returns (uint256[] memory timestamps, uint256[] memory amounts, uint8[] memory types)",
     "function getTotalPassiveCycles(address wallet, uint8 packageId) public view returns (uint256)",
     "function getPassiveCyclePositions(address wallet, uint8 packageId) public view returns (uint256[])",
     "function getPassiveCycleData(address wallet, uint8 packageId, uint256 cycleNo) public view returns (uint256, uint256, bool, bool)",
