@@ -241,7 +241,7 @@ window.handleRequestUnstake = async function(stakeIndex = 0) {
         alert("Unstake Requested! Wait 14 days to claim.");
     } catch (err) { alert("Error: " + err.message); }
 }
-window.handleWithdraw = async function() {
+window.handleTakeoutFromUI = async function() {
     // 1. सही ID (takeoutInput) का उपयोग करें
     const amountInput = document.getElementById('takeoutInput');
     const amount = amountInput.value;
