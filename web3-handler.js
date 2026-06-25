@@ -526,7 +526,42 @@ async function fetchAndDisplayData() {
         console.error("Data Load Error:", error);
     }
 }
+window.loadTree = async function() {
+    const selectElement = document.getElementById('packageSelect');
+    if (!selectElement) return; // अगर HTML में नहीं है तो रुकें
+    
+    const slot = selectElement.value;
+    const container = document.getElementById('treeContainer');
+    
+    if (!window.contract) { 
+        console.error("Contract not initialized");
+        return; 
+    }
 
+    try {
+        const user = await window.signer.getAddress();
+        container.innerHTML = "Loading...";
+
+        // कॉन्ट्रैक्ट से डायरेक्ट मेंबर्स लाएं
+        const members = await window.contract.getWorkingTree(user, slot);
+        
+        let html = `<ul><li><div class="node border-yellow-500 text-yellow-500">YOU<br>${user.substring(0, 6)}...</div><ul class="flex gap-2 pt-4">`;
+        
+        if (members.length === 0) {
+            html += `<li><div class="node bg-slate-800 border-dashed">No Members</div></li>`;
+        } else {
+            members.forEach(m => {
+                html += `<li><div class="node">${m.substring(0, 6)}...</div></li>`;
+            });
+        }
+        
+        html += `</ul></li></ul>`;
+        container.innerHTML = html;
+    } catch (err) {
+        console.error("Tree Load Error:", err);
+        container.innerHTML = "<div class='text-red-500'>Error loading tree data</div>";
+    }
+}
 
 async function fetchAllData(address) {
     // Referrer URL Setup
