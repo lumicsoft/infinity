@@ -21,10 +21,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="glass-luxury border-animate p-6 flex items-center justify-between">
                 <div>
-                    <p class="text-yellow-500 font-bold uppercase text-[10px]">Your Wallet Address</p>
-                    <code id="user-address" class="text-xs text-gray-400">Loading...</code>
-                    <p class="text-yellow-500 font-bold uppercase text-[10px] mt-2">Your Referral Link</p>
-                    <input type="text" id="refURL" readonly class="bg-transparent text-xs text-gray-400 w-full outline-none">
+                    <p class="text-yellow-500 font-bold uppercase text-[10px]">Your Referral Link</p>
+                    <input type="text" id="refURL" readonly class="bg-transparent text-xs text-gray-400 w-full outline-none" value="Loading...">
                 </div>
                 <button onclick="copyLink()" class="bg-indigo-600 p-3 rounded-lg"><i data-lucide="copy" class="w-4 h-4"></i></button>
             </div>
@@ -42,9 +40,11 @@
             <div class="glass-luxury border-animate p-5 flex items-center justify-between"><i data-lucide="ban" class="text-red-400"></i><div class="text-right"><p class="text-[9px] text-gray-400 uppercase">Skipped</p><h3 id="skipped-earning" class="font-orbit font-bold text-lg">$0.00</h3></div></div>
             <div class="glass-luxury border-animate p-5 flex items-center justify-between"><i data-lucide="shopping-cart" class="text-orange-400"></i><div class="text-right"><p class="text-[9px] text-gray-400 uppercase">Direct Gift</p><h3 id="direct-gift" class="font-orbit font-bold text-lg">$0.00</h3></div></div>
             <div class="glass-luxury border-animate p-5 flex items-center justify-between"><i data-lucide="users" class="text-emerald-400"></i><div class="text-right"><p class="text-[9px] text-gray-400 uppercase">Team Gift</p><h3 id="team-gift" class="font-orbit font-bold text-lg">$0.00</h3></div></div>
-            <div class="glass-luxury border-animate p-5 flex items-center justify-between"><i data-lucide="briefcase" class="text-yellow-400"></i><div class="text-right"><p class="text-[9px] text-gray-400 uppercase">Total Credited</p><h3 id="total-earned" class="font-orbit font-bold text-lg">$0.00</h3></div></div>
-            <div class="glass-luxury border-animate p-5 flex items-center justify-between"><i data-lucide="wallet" class="text-pink-400"></i><div class="text-right"><p class="text-[9px] text-gray-400 uppercase">Available</p><h3 id="available-balance" class="font-orbit font-bold text-lg">$0.00</h3></div></div>
-            <div class="glass-luxury border-animate p-5 flex items-center justify-between"><i data-lucide="trending-up" class="text-cyan-400"></i><div class="text-right"><p class="text-[9px] text-gray-400 uppercase">Withdrawal</p><h3 id="total-withdrawn" class="font-orbit font-bold text-lg">$0.00</h3></div></div>
+            <div class="glass-luxury border-animate p-5 flex items-center justify-between"><i data-lucide="briefcase" class="text-yellow-400"></i><div class="text-right"><p class="text-[9px] text-gray-400 uppercase">Passive Gift</p><h3 id="passive-gift" class="font-orbit font-bold text-lg">$0.00</h3></div></div>
+            <div class="glass-luxury border-animate p-5 flex items-center justify-between"><i data-lucide="wallet" class="text-pink-400"></i><div class="text-right"><p class="text-[9px] text-gray-400 uppercase">Total Credited</p><h3 id="total-earned" class="font-orbit font-bold text-lg">$0.00</h3></div></div>
+            <div class="glass-luxury border-animate p-5 flex items-center justify-between"><i data-lucide="trending-up" class="text-cyan-400"></i><div class="text-right"><p class="text-[9px] text-gray-400 uppercase">Available</p><h3 id="available-balance" class="font-orbit font-bold text-lg">$0.00</h3></div></div>
+            <div class="glass-luxury border-animate p-5 flex items-center justify-between"><i data-lucide="award" class="text-lime-400"></i><div class="text-right"><p class="text-[9px] text-gray-400 uppercase">Withdrawal</p><h3 id="total-withdrawn" class="font-orbit font-bold text-lg">$0.00</h3></div></div>
+            <div class="glass-luxury border-animate p-5 flex items-center justify-between"><i data-lucide="target" class="text-rose-400"></i><div class="text-right"><p class="text-[9px] text-gray-400 uppercase">Single Leg</p><h3 id="single-leg" class="font-orbit font-bold text-lg">$0.00</h3></div></div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -69,8 +69,8 @@
         lucide.createIcons();
         const pkgs = [21, 42, 84, 168, 336, 672, 1344, 2688, 5376, 10752];
         const grid = document.getElementById('pkgGrid');
-        pkgs.forEach(p => {
-            grid.innerHTML += `<button class="glass-luxury border-animate p-2 text-[10px] font-orbit font-bold hover:scale-105 transition">$${p}</button>`;
+        pkgs.forEach((p, index) => {
+            grid.innerHTML += `<button onclick="handleUpgrade([${index}])" class="glass-luxury border-animate p-2 text-[10px] font-orbit font-bold hover:scale-105 transition">$${p}</button>`;
         });
         function copyLink() {
             const refInput = document.getElementById('refURL');
