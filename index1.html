@@ -65,20 +65,27 @@
     <script src="components.js"></script>
     <script src="web3-handler.js"></script>
 
-    <script>
-        lucide.createIcons();
-        const pkgs = [21, 42, 84, 168, 336, 672, 1344, 2688, 5376, 10752];
-        const grid = document.getElementById('pkgGrid');
-        pkgs.forEach((p, index) => {
-            grid.innerHTML += `<button onclick="handleUpgrade([${index}])" class="glass-luxury border-animate p-2 text-[10px] font-orbit font-bold hover:scale-105 transition">$${p}</button>`;
-        });
-        function copyLink() {
-            const refInput = document.getElementById('refURL');
-            if(refInput.value) {
-                navigator.clipboard.writeText(refInput.value);
-                alert("Referral Link Copied!");
-            }
+   <script>
+    lucide.createIcons();
+    const pkgs = [21, 42, 84, 168, 336, 672, 1344, 2688, 5376, 10752];
+    const grid = document.getElementById('pkgGrid');
+    
+    pkgs.forEach((p, index) => {
+        // यहाँ index आपका packageId है [0, 1, 2...]
+        grid.innerHTML += `
+            <button onclick="handleUpgrade([${index}])" 
+                    class="glass-luxury border-animate p-3 text-[10px] font-orbit font-bold hover:scale-105 transition text-yellow-500">
+                Buy $${p}
+            </button>`;
+    });
+
+    function copyLink() {
+        const refInput = document.getElementById('refURL');
+        if(refInput.value && refInput.value !== "Loading...") {
+            navigator.clipboard.writeText(refInput.value);
+            alert("Referral Link Copied!");
         }
-    </script>
+    }
+</script>
 </body>
 </html>
