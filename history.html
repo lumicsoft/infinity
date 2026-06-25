@@ -41,7 +41,7 @@
                         </tr>
                     </thead>
                     <tbody id="historyBody">
-                        <tr><td colspan="3" class="text-center py-10">Loading history...</td></tr>
+                        <tr><td colspan="3" class="text-center py-10">Waiting for connection...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -57,8 +57,15 @@
             btn.classList.add('active');
             if(window.filterHistory) window.filterHistory(type);
         }
+
         window.addEventListener('load', async () => {
-            if(window.loadHistory) await window.loadHistory();
+            // इंतज़ार करें जब तक कॉन्ट्रैक्ट लोड न हो जाए
+            let timer = setInterval(async () => {
+                if (window.contract && window.signer) {
+                    clearInterval(timer);
+                    if(window.loadHistory) await window.loadHistory();
+                }
+            }, 500);
         });
     </script>
 </body>
