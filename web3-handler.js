@@ -206,30 +206,40 @@ window.handleUpgrade = async function(packageIds) {
 }
 let allHistoryData = [];
 
+// यह फंक्शन पक्का करें कि आपके वेब3 हैंडलर में है
 window.loadHistory = async function() {
+    const tbody = document.getElementById('historyBody');
+    if (!tbody) return; // अगर पेज पर टेबल नहीं है तो रुक जाएं
+    
     try {
-        // initWeb3 को कॉल करें अगर पहले से नहीं है
-        if (!window.contract) await window.initWeb3(); 
-        
+        // 1. अगर कॉन्ट्रैक्ट नहीं है, तो पहले कनेक्ट करें
+        if (!window.contract) {
+            await window.initWeb3();
+        }
+
+        // 2. यूजर एड्रेस लें
         const userAddress = await window.signer.getAddress();
+        
+        // 3. कॉन्ट्रैक्ट से डेटा लाएं
         const report = await window.contract.getUserIncomeReport(userAddress);
         
+        // 4. डेटा प्रोसेस करें
         allHistoryData = report.timestamps.map((t, i) => ({
-            time: t,
+            time: t.toNumber(), // पक्का करें कि यह नंबर है
             amount: report.amounts[i],
             type: report.types[i]
         }));
         
+        // 5. डिफ़ॉल्ट 'All' (0) दिखाएं
         window.filterHistory(0);
     } catch (err) {
-        console.error("Error:", err);
-        document.getElementById('historyBody').innerHTML = "<tr><td colspan='3' class='text-center py-10 text-red-400'>Failed to load data</td></tr>";
+        console.error("Load History Error:", err);
+        tbody.innerHTML = "<tr><td colspan='3' class='text-center py-10 text-red-500'>Error loading data. Connect wallet first!</td></tr>";
     }
 }
 
 window.filterHistory = function(filterType) {
     const tbody = document.getElementById('historyBody');
-    tbody.innerHTML = "";
     const typeNames = ["", "Referral", "Active", "Passive", "Passive Gift", "Team Gift", "Direct Gift", "Single Leg"];
 
     const filtered = filterType === 0 
@@ -241,19 +251,20 @@ window.filterHistory = function(filterType) {
         return;
     }
 
+    tbody.innerHTML = "";
+    // डेटा को उल्टा करें ताकि लेटेस्ट ऊपर दिखे
     filtered.slice().reverse().forEach(item => {
         const time = new Date(item.time * 1000).toLocaleDateString();
         const amount = ethers.utils.formatEther(item.amount);
         tbody.innerHTML += `
             <tr class="border-b border-slate-700">
                 <td class="py-3 px-2 text-white">${typeNames[item.type] || "Income"}</td>
-                <td class="py-3 px-2 text-emerald-400">${parseFloat(amount).toFixed(2)} USDT</td>
-                <td class="py-3 px-2 text-gray-400">${time}</td>
+                <td class="py-3 px-2 text-emerald-400 font-bold">${parseFloat(amount).toFixed(2)} USDT</td>
+                <td class="py-3 px-2 text-gray-400 text-xs">${time}</td>
             </tr>
         `;
     });
 }
-
 window.handleTakeoutFromUI = async function() {
     // 1. सही ID (takeoutInput) का उपयोग करें
     const amountInput = document.getElementById('takeoutInput');
