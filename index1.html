@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Infinity Global | Ultra Luxury Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -55,38 +56,37 @@
                 <button onclick="handleTakeoutFromUI()" class="btn-gold w-full p-4 rounded-xl text-lg font-orbit">PROCESS TAKEOUT</button>
             </div>
             <div class="glass-luxury border-animate p-8">
-    <h2 class="font-orbit text-xl font-bold mb-4">Choose Packages</h2>
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-3" id="pkgGrid">
-        <!-- Buttons will be injected here via script -->
-    </div>
-</div>
+                <h2 class="font-orbit text-xl font-bold mb-4">Choose Packages</h2>
+                <!-- यहाँ ग्रिड रिस्पॉन्सिव कर दिया है (2 col mobile, 5 col desktop) -->
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3" id="pkgGrid"></div>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="components.js"></script>
     <script src="web3-handler.js"></script>
 
-   <script>
-    lucide.createIcons();
-    const pkgs = [21, 42, 84, 168, 336, 672, 1344, 2688, 5376, 10752];
-    const grid = document.getElementById('pkgGrid');
-    
-    pkgs.forEach((p, index) => {
-        // यहाँ index आपका packageId है [0, 1, 2...]
-        grid.innerHTML += `
-            <button onclick="handleUpgrade([${index}])" 
-                    class="glass-luxury border-animate p-3 text-[10px] font-orbit font-bold hover:scale-105 transition text-yellow-500">
-                Buy $${p}
-            </button>`;
-    });
+    <script>
+        lucide.createIcons();
+        const pkgs = [21, 42, 84, 168, 336, 672, 1344, 2688, 5376, 10752];
+        const grid = document.getElementById('pkgGrid');
+        
+        pkgs.forEach((p, index) => {
+            grid.innerHTML += `
+                <button onclick="handleUpgrade([${index}])" 
+                        class="glass-luxury border-animate p-3 text-[10px] font-orbit font-bold hover:scale-105 transition text-yellow-500">
+                    Buy $${p}
+                </button>`;
+        });
 
-    function copyLink() {
-        const refInput = document.getElementById('refURL');
-        if(refInput.value && refInput.value !== "Loading...") {
-            navigator.clipboard.writeText(refInput.value);
-            alert("Referral Link Copied!");
+        function copyLink() {
+            const refInput = document.getElementById('refURL');
+            if(refInput.value && refInput.value !== "Loading...") {
+                navigator.clipboard.writeText(refInput.value);
+                alert("Referral Link Copied!");
+            }
         }
-    }
-</script>
+    </script>
 </body>
 </html>
