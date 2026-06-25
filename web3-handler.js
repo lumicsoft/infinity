@@ -312,12 +312,19 @@ async function setupApp(address) {
         console.error("Network check failed:", err);
     }
 
+    // --- NEW: UI Update Logic (Referral & Address) ---
+    const addrDisplay = document.getElementById('user-address');
+    if(addrDisplay) addrDisplay.innerText = address.substring(0, 6) + "..." + address.substring(38);
+    
+    const refInput = document.getElementById('refURL');
+    if(refInput) refInput.value = `${window.location.origin}/register.html?ref=${address}`;
+
     // 2. कॉन्ट्रैक्ट डेटा और रिडायरेक्शन लॉजिक
     // यहाँ हमने contract.users के बजाय getUserDetails का उपयोग किया है
     let userExists = false;
     try {
         const userData = await contract.getUserDetails(address);
-        // अगर userId (पहली वैल्यू) 0 से बड़ी है, तो यूजर मौजूद है
+        // अगर userId (पहली वैल्यू) 0 से बड़ी है, तो यूजर मौजूद है
         userExists = userData[0].toString() !== "0";
     } catch (e) {
         console.error("User check error:", e);
@@ -455,15 +462,20 @@ async function fetchAllData(address) {
     if(addrDisplay) addrDisplay.innerText = address.substring(0, 6) + "..." + address.substring(38);
     
     try {
+        // --- Contract Ready Check ---
+        if (!window.contract) {
+            console.warn("Contract not initialized yet, waiting...");
+            setTimeout(() => fetchAllData(address), 1000); // 1 सेकंड बाद फिर ट्राई करेगा
+            return;
+        }
+
         // 1. User Details Fetch
-        const user = await contract.getUserDetails(address); 
+        const user = await window.contract.getUserDetails(address); 
         
         // 2. Bonus Wallet Fetch
-        const bonus = await contract.userBonusUSDTWallet(address);
+        const bonus = await window.contract.userBonusUSDTWallet(address);
 
         // --- Dashboard UI Mapping ---
-
-        // Stats Box
         updateText('total-deposit', format(user[3]));         // totalSelfPurchasing
         updateText('total-earned', format(bonus[3]));        // totalCreditedBonus
         updateText('total-withdrawn', format(bonus[6]));     // totalWithdrawalBonus
@@ -478,7 +490,8 @@ async function fetchAllData(address) {
         updateText('skipped-earning', format(bonus[5]));     // totalSkippedBonus
         updateText('direct-gift', format(bonus[8]));         // directWorkGiftBonus
         updateText('team-gift', format(bonus[9]));           // teamWorkGiftBonus
-        
+        updateText('passive-gift', format(bonus[7]));        // passiveGiftBonus
+
         // Withdrawable Balance
         updateText('available-balance', format(bonus[4]));   // totalAvailableBonus
         updateText('withdraw-balance-display', format(bonus[4]));
@@ -488,10 +501,14 @@ async function fetchAllData(address) {
     }
 }
 
-// Helpers - Ethers v5/v6 compatibility
+// Helpers - Ethers v5 compatibility
 const format = (val) => {
     try {
-        return val ? parseFloat(ethers.utils.formatEther(val.toString())).toFixed(2) : "0.00";
+        // ethers.utils मौजूद है या नहीं चेक करें
+        if (typeof ethers !== 'undefined' && ethers.utils) {
+            return val ? parseFloat(ethers.utils.formatEther(val.toString())).toFixed(2) : "0.00";
+        }
+        return "0.00";
     } catch (e) {
         return "0.00";
     }
@@ -504,4 +521,5 @@ const updateText = (id, val) => {
     }
 };
 
+// init() function load होने पर ट्रिगर करें
 window.addEventListener('load', init);
