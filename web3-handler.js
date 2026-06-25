@@ -253,14 +253,7 @@ window.filterHistory = function(filterType) {
         `;
     });
 }
-window.handleRequestUnstake = async function(stakeIndex = 0) {
-    try {
-        const activeContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider.getSigner());
-        const tx = await activeContract.requestUnstake(stakeIndex);
-        await tx.wait();
-        alert("Unstake Requested! Wait 14 days to claim.");
-    } catch (err) { alert("Error: " + err.message); }
-}
+
 window.handleTakeoutFromUI = async function() {
     // 1. सही ID (takeoutInput) का उपयोग करें
     const amountInput = document.getElementById('takeoutInput');
@@ -296,33 +289,6 @@ window.handleTakeoutFromUI = async function() {
         event.target.innerText = "PROCESS TAKEOUT";
     }
 }
-window.handleClaimUnstake = async function(stakeIndex = 0) {
-    try {
-        const activeContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider.getSigner());
-        const tx = await activeContract.claimUnstake(stakeIndex);
-        await tx.wait();
-        alert("Capital Claimed!");
-        location.reload();
-    } catch (err) { alert("Error: " + err.message); }
-}
-
-
-window.handleCompoundDaily = async function() {
-    const compoundBtn = event.target;
-    const originalText = compoundBtn.innerText;
-    try {
-        compoundBtn.disabled = true; compoundBtn.innerText = "WAITING...";
-        const tx = await contract.reinvestMatured();
-        compoundBtn.innerText = "REINVESTING...";
-        await tx.wait();
-        alert("Reinvestment Successful!");
-        location.reload(); 
-    } catch (err) {
-        alert("Reinvest failed: " + (err.reason || err.message));
-        compoundBtn.innerText = originalText; compoundBtn.disabled = false;
-    }
-}
-
 
 window.handleLogin = async function() {
     try {
