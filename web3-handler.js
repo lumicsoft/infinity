@@ -242,15 +242,39 @@ window.handleRequestUnstake = async function(stakeIndex = 0) {
     } catch (err) { alert("Error: " + err.message); }
 }
 window.handleWithdraw = async function() {
-    const amount = document.getElementById('withdraw-amount').value;
-    if(!amount || amount <= 0) return alert("Enter valid amount");
+    // 1. सही ID (takeoutInput) का उपयोग करें
+    const amountInput = document.getElementById('takeoutInput');
+    const amount = amountInput.value;
+    
+    if (!amount || amount <= 0) return alert("Enter valid amount");
+    
     try {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerText = "PROCESSING...";
+
+        // 2. 18 डेसिमल्स के साथ अमाउंट कन्वर्ट करें
         const amountInWei = ethers.utils.parseUnits(amount.toString(), 18);
-        const tx = await window.contract.withdraw(amountInWei);
+        
+        // 3. गैस एस्टिमेशन (30% बफर के साथ)
+        const estimatedGas = await window.contract.estimateGas.takeOut(amountInWei);
+        const gasLimit = estimatedGas.mul(130).div(100);
+
+        // 4. कॉन्ट्रैक्ट का सही फंक्शन नाम 'takeOut' का उपयोग करें
+        const tx = await window.contract.takeOut(amountInWei, { 
+            gasLimit: gasLimit 
+        });
+
         await tx.wait();
         alert("Withdrawal Successful!");
         location.reload();
-    } catch (err) { alert("Withdraw Error: " + (err.reason || err.message)); }
+        
+    } catch (err) { 
+        console.error("Withdraw Error:", err);
+        alert("Withdraw Error: " + (err.reason || err.message));
+        event.target.disabled = false;
+        event.target.innerText = "PROCESS TAKEOUT";
+    }
 }
 window.handleClaimUnstake = async function(stakeIndex = 0) {
     try {
