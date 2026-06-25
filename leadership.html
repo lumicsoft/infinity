@@ -47,21 +47,20 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="web3-handler.js"></script>
-    <script>
+  <script>
         lucide.createIcons();
 
-        // ट्री लोड करने का फाइनल फंक्शन
+        // 1. ट्री लोड करने का फंक्शन (अब यह web3-handler.js में भी होना चाहिए)
         window.loadTree = async function() {
-            const slot = document.getElementById('packageSelect').value;
+            const selectElement = document.getElementById('packageSelect');
             const container = document.getElementById('treeContainer');
-            
-            if(!window.contract) { alert("Connect Wallet First!"); return; }
+            if(!selectElement || !window.contract) return;
+
+            const slot = selectElement.value;
+            const user = await window.signer.getAddress();
+            container.innerHTML = "Loading...";
 
             try {
-                const user = await window.signer.getAddress();
-                container.innerHTML = "Loading...";
-
-                // कॉन्ट्रैक्ट से डायरेक्ट मेंबर्स लाएं
                 const members = await window.contract.getWorkingTree(user, slot);
                 
                 let html = `<ul><li><div class="node border-yellow-500 text-yellow-500">YOU<br>${user.substring(0,8)}...</div><ul class="flex gap-2 pt-4">`;
@@ -81,6 +80,16 @@
                 container.innerHTML = "<div class='text-red-500'>Error loading tree</div>";
             }
         }
+
+        // 2. ऑटोमैटिक लोड लॉजिक
+        window.addEventListener('load', async () => {
+            let timer = setInterval(async () => {
+                if (window.contract && window.signer) {
+                    clearInterval(timer);
+                    await window.loadTree();
+                }
+            }, 500);
+        });
     </script>
 </body>
 </html>
