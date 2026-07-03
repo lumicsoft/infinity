@@ -171,7 +171,7 @@ window.handleUpgrade = async function(packageIds) {
         // 1. पैकेज प्राइस निकालें (इंडेक्स 0 मतलब पहला पैकेज)
         // ध्यान दें: आपके HTML में index 0 से 9 है
         const pid = packageIds[0];
-        const price = [21, 42, 84, 168, 336, 672, 1344, 2688, 5376, 10752][pid];
+        const price = [11, 22, 44, 88, 176, 352, 704, 1408, 2816, 5632][pid];
         const amountInWei = ethers.utils.parseEther(price.toString());
 
         // 2. USDT कॉन्ट्रैक्ट के साथ अप्रूवल
