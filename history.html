@@ -10,14 +10,15 @@
         body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .font-orbit { font-family: 'Orbitron', sans-serif; }
         .glass-luxury { background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95)); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
-        .border-animate { position: relative; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .border-animate { position: relative; background: linear-gradient(#0f172a, #0f172a) padding-box, linear-gradient(90deg, #7c3aed, #0ea5e9, #f59e0b, #7c3aed) border-box; border: 2px solid transparent; background-size: 300% 300%; animation: gradient-flow 6s ease infinite; }
+        @keyframes gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         .btn-filter { background: #0f172a; border: 1px solid #334155; transition: 0.3s; color: #94a3b8; }
         .btn-filter:hover, .btn-filter.active { background: #6366f1; border-color: #818cf8; color: #fff; }
     </style>
 </head>
 <body class="p-4 md:p-8">
     <div class="max-w-4xl mx-auto space-y-6">
-        <a href="index1.html" class="text-indigo-400 flex items-center gap-2 mb-4 font-bold uppercase text-xs">← Back to Dashboard</a>
+        <a href="index1.html" class="text-indigo-400 flex items-center gap-2 mb-4 font-bold uppercase text-xs hover:text-white transition">← Back to Dashboard</a>
         
         <h2 class="font-orbit text-2xl font-bold text-yellow-500">Income History</h2>
 
@@ -30,7 +31,7 @@
             <button onclick="setActive(this, 7)" class="btn-filter px-4 py-2 rounded-lg text-[10px] font-bold">SINGLE LEG</button>
         </div>
         
-        <div class="glass-luxury p-6 border-animate">
+        <div class="glass-luxury border-animate p-6">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm text-gray-400">
                     <thead class="text-[10px] uppercase text-yellow-500 border-b border-slate-700">
@@ -41,7 +42,7 @@
                         </tr>
                     </thead>
                     <tbody id="historyBody">
-                        <tr><td colspan="3" class="text-center py-10">Waiting for connection...</td></tr>
+                        <tr><td colspan="3" class="text-center py-10 text-gray-500">Loading history data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -59,7 +60,6 @@
         }
 
         window.addEventListener('load', async () => {
-            // इंतज़ार करें जब तक कॉन्ट्रैक्ट लोड न हो जाए
             let timer = setInterval(async () => {
                 if (window.contract && window.signer) {
                     clearInterval(timer);
