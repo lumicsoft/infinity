@@ -67,35 +67,41 @@
     <script src="components.js"></script>
     <script src="web3-handler.js"></script>
 
-    <script>
+   <script>
+    lucide.createIcons();
+    const pkgs = [11, 22, 44, 88, 176, 352, 704, 1408, 2816, 5632];
+    
+    // 1. ये फंक्शन पक्का कॉल होगा (चाहे डेटा आए या न आए)
+    window.renderPackages = function(purchasedArray = []) {
+        const grid = document.getElementById('pkgGrid');
+        if (!grid) return;
+        
+        grid.innerHTML = '';
+        pkgs.forEach((p, index) => {
+            const isBought = purchasedArray.length > 0 ? purchasedArray[index] : false;
+            grid.innerHTML += `
+                <button onclick="handleUpgrade([${index}])" ${isBought ? 'disabled' : ''}
+                        class="glass-luxury border-animate p-3 text-[10px] font-orbit font-bold transition flex flex-col items-center justify-center 
+                        ${isBought ? 'opacity-50 cursor-not-allowed border-green-500' : 'hover:scale-105'} text-yellow-500">
+                    ${isBought ? '<i data-lucide="check-circle" class="w-5 h-5 text-green-500 mb-1"></i>' : ''}
+                    Buy $${p}
+                </button>`;
+        });
         lucide.createIcons();
-        window.uiReady = true; // मार्कर ताकि handler को पता चले कि HTML लोड हो गया है
-        
-        const pkgs = [11, 22, 44, 88, 176, 352, 704, 1408, 2816, 5632];
-        
-        window.renderPackages = function(purchasedArray) {
-            const grid = document.getElementById('pkgGrid');
-            grid.innerHTML = '';
-            pkgs.forEach((p, index) => {
-                const isBought = purchasedArray[index];
-                grid.innerHTML += `
-                    <button onclick="handleUpgrade([${index}])" ${isBought ? 'disabled' : ''}
-                            class="glass-luxury border-animate p-3 text-[10px] font-orbit font-bold transition flex flex-col items-center justify-center 
-                            ${isBought ? 'opacity-50 cursor-not-allowed border-green-500' : 'hover:scale-105'} text-yellow-500">
-                        ${isBought ? '<i data-lucide="check-circle" class="w-5 h-5 text-green-500 mb-1"></i>' : ''}
-                        Buy $${p}
-                    </button>`;
-            });
-            lucide.createIcons();
-        };
+    };
 
-        function copyLink() {
-            const refInput = document.getElementById('refURL');
-            if(refInput.value && refInput.value !== "Loading...") {
-                navigator.clipboard.writeText(refInput.value);
-                alert("Referral Link Copied!");
-            }
+    // 2. तुरंत खाली स्टेट रेंडर करें ताकि बटन दिखने लगें
+    window.addEventListener('DOMContentLoaded', () => {
+        window.renderPackages([]); // खाली array के साथ कॉल करें ताकि बटन लोड हो जाएं
+    });
+
+    function copyLink() {
+        const refInput = document.getElementById('refURL');
+        if(refInput.value && refInput.value !== "Loading...") {
+            navigator.clipboard.writeText(refInput.value);
+            alert("Referral Link Copied!");
         }
-    </script>
+    }
+</script>
 </body>
 </html>
