@@ -577,7 +577,7 @@ async function fetchAllData(address) {
         // --- Contract Ready Check ---
         if (!window.contract) {
             console.warn("Contract not initialized yet, waiting...");
-            setTimeout(() => fetchAllData(address), 1000); // 1 सेकंड बाद फिर ट्राई करेगा
+            setTimeout(() => fetchAllData(address), 1000); 
             return;
         }
 
@@ -587,10 +587,21 @@ async function fetchAllData(address) {
         // 2. Bonus Wallet Fetch
         const bonus = await window.contract.userBonusUSDTWallet(address);
 
+        // --- NEW: Package Status Fetch ---
+        try {
+            const purchaseData = await window.contract.globalOrbitPurchaseDetails(address);
+            // purchaseData[0] = bool[10] (purchasedPackage)
+            if (window.renderPackages) {
+                window.renderPackages(purchaseData[0]);
+            }
+        } catch (e) {
+            console.error("Package status load error:", e);
+        }
+
         // --- Dashboard UI Mapping ---
-        updateText('total-deposit', format(user[3]));         // totalSelfPurchasing
-        updateText('total-earned', format(bonus[3]));        // totalCreditedBonus
-        updateText('total-withdrawn', format(bonus[6]));     // totalWithdrawalBonus
+        updateText('total-deposit', format(user[3]));          // totalSelfPurchasing
+        updateText('total-earned', format(bonus[3]));         // totalCreditedBonus
+        updateText('total-withdrawn', format(bonus[6]));      // totalWithdrawalBonus
         updateText('team-count', user[8] ? user[8].toString() : "0");        // noOfTotalTeam
         updateText('directs-count', user[7] ? user[7].toString() : "0");     // totalDirect
         
@@ -606,7 +617,7 @@ async function fetchAllData(address) {
 
         // Withdrawable Balance
         updateText('available-balance', format(bonus[4]));   // totalAvailableBonus
-        updateText('withdraw-balance-display', format(bonus[4]));
+        updateText('withdraw-balance-display', format(bonus[4]) + " USDT");
 
     } catch (err) { 
         console.error("Data Sync Error:", err); 
