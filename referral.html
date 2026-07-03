@@ -83,66 +83,58 @@
     <script>
         lucide.createIcons();
 
-      async function loadReferralData() {
-    if (!window.contract) return;
-    try {
-        const address = await window.signer.getAddress();
-        
-        // कॉन्ट्रैक्ट से डेटा फेच करें (यह एक Array रिटर्न करेगा)
-        const user = await window.contract.getUserDetails(address);
-        // user[7] = totalDirect, user[8] = noOfTotalTeam (इंडेक्सिंग के अनुसार)
-        
-        document.getElementById('direct-count').innerText = user[7].toString();
-        document.getElementById('team-count').innerText = user[8].toString();
-        
-        // बोनस वॉलेट डेटा
-        const bonus = await window.contract.userBonusUSDTWallet(address);
-        // bonus[3] = totalCreditedBonus, [0] = referralBonus, [1] = activeorbitBonus
-        
-        const format = (val) => ethers.utils.formatEther(val.toString());
-        document.getElementById('total-earned').innerText = format(bonus[3]);
-        document.getElementById('referral-earnings').innerText = format(bonus[0]);
-        document.getElementById('level-earnings').innerText = format(bonus[1]);
-        
-        loadLevelData(1);
-    } catch (err) { 
-        console.error("Referral Error:", err); 
-    }
-}
-
-async function loadLevelData(level) {
-    const tableBody = document.getElementById('team-table-body');
-    tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-yellow-500">SYNCING LEVEL ${level}...</td></tr>`;
-    
-    try {
-        const address = await window.signer.getAddress();
-        // लेवल 1 के लिए इंडेक्स 0 होगा, इसलिए (level - 1)
-        const members = await window.contract.getFetchLevel(address, 0, parseInt(level) - 1);
-        
-        if (!members || members.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-gray-600">No members at Level ${level}</td></tr>`;
-            return;
+        async function loadReferralData() {
+            if (!window.contract) return;
+            try {
+                const address = await window.signer.getAddress();
+                const user = await window.contract.getUserDetails(address);
+                document.getElementById('direct-count').innerText = user[7].toString();
+                document.getElementById('team-count').innerText = user[8].toString();
+                
+                const bonus = await window.contract.userBonusUSDTWallet(address);
+                
+                const format = (val) => parseFloat(ethers.utils.formatEther(val.toString())).toFixed(2);
+                
+                document.getElementById('total-earned').innerText = format(bonus[3]);
+                document.getElementById('referral-earnings').innerText = format(bonus[0]);
+                document.getElementById('level-earnings').innerText = format(bonus[1]);
+                
+                loadLevelData(1);
+            } catch (err) { console.error("Referral Error:", err); }
         }
 
-        let html = '';
-        for (let i = 0; i < members.length; i++) {
-            const memberDetails = await window.contract.getUserDetails(members[i]);
-            // memberDetails[3] = totalSelfPurchasing
-            const isPurchased = memberDetails[3].gt(0); 
+        async function loadLevelData(level) {
+            const tableBody = document.getElementById('team-table-body');
+            tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-yellow-500">SYNCING LEVEL ${level}...</td></tr>`;
             
-            html += `<tr>
-                <td class="p-4 font-mono text-yellow-500">${members[i].substring(0,6)}...${members[i].substring(38)}</td>
-                <td class="p-4">Lvl ${level}</td>
-                <td class="p-4">$${parseFloat(ethers.utils.formatEther(memberDetails[3])).toFixed(2)}</td>
-                <td class="p-4">${isPurchased ? '<span class="text-green-500">ACTIVE</span>' : '<span class="text-red-500">INACTIVE</span>'}</td>
-            </tr>`;
+            try {
+                const address = await window.signer.getAddress();
+                const members = await window.contract.getFetchLevel(address, 0, parseInt(level) - 1);
+                
+                if (!members || members.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-gray-600">No members at Level ${level}</td></tr>`;
+                    return;
+                }
+
+                let html = '';
+                for (let i = 0; i < members.length; i++) {
+                    const memberDetails = await window.contract.getUserDetails(members[i]);
+                    const stake = parseFloat(ethers.utils.formatEther(memberDetails[3].toString())).toFixed(2);
+                    const isPurchased = parseFloat(stake) > 0;
+                    
+                    html += `<tr>
+                        <td class="p-4 font-mono text-yellow-500">${members[i].substring(0,6)}...${members[i].substring(38)}</td>
+                        <td class="p-4">Lvl ${level}</td>
+                        <td class="p-4">$${stake}</td>
+                        <td class="p-4">${isPurchased ? '<span class="text-green-500">ACTIVE</span>' : '<span class="text-red-500">INACTIVE</span>'}</td>
+                    </tr>`;
+                }
+                tableBody.innerHTML = html;
+            } catch (err) { 
+                console.error("Error:", err);
+                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Error Loading Data</td></tr>`; 
+            }
         }
-        tableBody.innerHTML = html;
-    } catch (err) { 
-        console.error("Error:", err);
-        tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Error Loading Data</td></tr>`; 
-    }
-}
 
         window.addEventListener('load', () => setTimeout(loadReferralData, 1500));
     </script>
