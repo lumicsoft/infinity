@@ -599,14 +599,15 @@ async function fetchAllData(address) {
         // --- NEW: Package Status Fetch ---
        try {
     const purchaseData = await window.contract.globalOrbitPurchaseDetails(address);
-    console.log("Contract se mila data:", purchaseData[0]); // इसे F12 Console में चेक करें!
-    
+    // purchaseData[0] एक boolean array है
     if (window.renderPackages) {
         window.renderPackages(purchaseData[0]);
     }
-        } catch (e) {
-            console.error("Package status load error:", e);
-        }
+} catch (e) {
+    console.error("Package status error:", e);
+    // एरर आने पर भी डिफ़ॉल्ट बटन दिखा दें
+    if (window.renderPackages) window.renderPackages([]);
+}
 
         // --- Dashboard UI Mapping ---
         updateText('total-deposit', format(user[3]));          // totalSelfPurchasing
