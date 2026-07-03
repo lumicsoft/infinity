@@ -57,7 +57,6 @@
             </div>
             <div class="glass-luxury border-animate p-8">
                 <h2 class="font-orbit text-xl font-bold mb-4">Choose Packages</h2>
-                <!-- यहाँ ग्रिड रिस्पॉन्सिव कर दिया है (2 col mobile, 5 col desktop) -->
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-3" id="pkgGrid"></div>
             </div>
         </div>
@@ -69,16 +68,24 @@
 
     <script>
         lucide.createIcons();
-        const pkgs = [21, 42, 84, 168, 336, 672, 1344, 2688, 5376, 10752];
-        const grid = document.getElementById('pkgGrid');
+        const pkgs = [11, 22, 44, 88, 176, 352, 704, 1408, 2816, 5632];
         
-        pkgs.forEach((p, index) => {
-            grid.innerHTML += `
-                <button onclick="handleUpgrade([${index}])" 
-                        class="glass-luxury border-animate p-3 text-[10px] font-orbit font-bold hover:scale-105 transition text-yellow-500">
-                    Buy $${p}
-                </button>`;
-        });
+        // यह फंक्शन web3-handler.js से कॉल किया जाएगा
+        window.renderPackages = function(purchasedArray) {
+            const grid = document.getElementById('pkgGrid');
+            grid.innerHTML = '';
+            pkgs.forEach((p, index) => {
+                const isBought = purchasedArray[index];
+                grid.innerHTML += `
+                    <button onclick="handleUpgrade([${index}])" ${isBought ? 'disabled' : ''}
+                            class="glass-luxury border-animate p-3 text-[10px] font-orbit font-bold transition flex flex-col items-center justify-center 
+                            ${isBought ? 'opacity-50 cursor-not-allowed border-green-500' : 'hover:scale-105'} text-yellow-500">
+                        ${isBought ? '<i data-lucide="check-circle" class="w-5 h-5 text-green-500 mb-1"></i>' : ''}
+                        Buy $${p}
+                    </button>`;
+            });
+            lucide.createIcons();
+        };
 
         function copyLink() {
             const refInput = document.getElementById('refURL');
