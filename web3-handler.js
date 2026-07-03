@@ -597,12 +597,13 @@ async function fetchAllData(address) {
         const bonus = await window.contract.userBonusUSDTWallet(address);
 
         // --- NEW: Package Status Fetch ---
-        try {
-            const purchaseData = await window.contract.globalOrbitPurchaseDetails(address);
-            // purchaseData[0] = bool[10] (purchasedPackage)
-            if (window.renderPackages) {
-                window.renderPackages(purchaseData[0]);
-            }
+       try {
+    const purchaseData = await window.contract.globalOrbitPurchaseDetails(address);
+    console.log("Contract se mila data:", purchaseData[0]); // इसे F12 Console में चेक करें!
+    
+    if (window.renderPackages) {
+        window.renderPackages(purchaseData[0]);
+    }
         } catch (e) {
             console.error("Package status load error:", e);
         }
