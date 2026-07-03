@@ -8,49 +8,53 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
         .font-orbit { font-family: 'Orbitron', sans-serif; }
         .glass-luxury { background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95)); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
-        .border-animate { border: 1px solid rgba(255, 255, 255, 0.1); }
-        /* Tree CSS */
+        .border-animate { position: relative; background: linear-gradient(#0f172a, #0f172a) padding-box, linear-gradient(90deg, #7c3aed, #0ea5e9, #f59e0b, #7c3aed) border-box; border: 2px solid transparent; background-size: 300% 300%; animation: gradient-flow 6s ease infinite; }
+        @keyframes gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        
+        /* Tree Styles */
         .tree ul { display: flex; justify-content: center; padding-top: 20px; }
-        .node { background: #1e293b; border: 1px solid #6366f1; padding: 10px 15px; border-radius: 12px; font-size: 10px; font-weight: bold; min-width: 100px; text-align: center; color: #fbbf24; }
+        .node { background: #0f172a; border: 1px solid #4f46e5; padding: 12px; border-radius: 12px; font-size: 9px; font-weight: bold; min-width: 110px; text-align: center; color: #fbbf24; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
     </style>
 </head>
 <body class="p-4 md:p-8">
+
     <div class="max-w-4xl mx-auto space-y-6">
-        <a href="index1.html" class="text-indigo-400 flex items-center gap-2 mb-4 font-bold uppercase text-xs">← Back to Dashboard</a>
+        <a href="index1.html" class="text-indigo-400 flex items-center gap-2 mb-4 font-bold uppercase text-xs hover:text-white transition">← Back to Dashboard</a>
         
         <h2 class="font-orbit text-2xl font-bold text-yellow-500">Network Tree</h2>
 
-        <div class="glass-luxury p-6 border-animate">
-           <label class="text-[10px] text-gray-400 uppercase font-bold mb-2 block">Select Package Level</label>
-<select id="packageSelect" onchange="loadTree()" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white mb-6 outline-none">
-    <option value="0">Package 1 (11 USDT)</option>
-    <option value="1">Package 2 (22 USDT)</option>
-    <option value="2">Package 3 (44 USDT)</option>
-    <option value="3">Package 4 (88 USDT)</option>
-    <option value="4">Package 5 (176 USDT)</option>
-    <option value="5">Package 6 (352 USDT)</option>
-    <option value="6">Package 7 (704 USDT)</option>
-    <option value="7">Package 8 (1408 USDT)</option>
-    <option value="8">Package 9 (2816 USDT)</option>
-    <option value="9">Package 10 (5632 USDT)</option>
-</select>
+        <div class="glass-luxury border-animate p-6">
+            <label class="text-[10px] text-gray-400 uppercase font-bold mb-2 block">Select Package Level</label>
+            <select id="packageSelect" onchange="loadTree()" class="w-full bg-slate-900 border border-slate-700 p-3 rounded-xl text-white mb-6 outline-none focus:border-indigo-500">
+                <option value="0">Package 1 (11 USDT)</option>
+                <option value="1">Package 2 (22 USDT)</option>
+                <option value="2">Package 3 (44 USDT)</option>
+                <option value="3">Package 4 (88 USDT)</option>
+                <option value="4">Package 5 (176 USDT)</option>
+                <option value="5">Package 6 (352 USDT)</option>
+                <option value="6">Package 7 (704 USDT)</option>
+                <option value="7">Package 8 (1408 USDT)</option>
+                <option value="8">Package 9 (2816 USDT)</option>
+                <option value="9">Package 10 (5632 USDT)</option>
+            </select>
 
             <div id="treeContainer" class="tree overflow-x-auto min-h-[300px] flex justify-center">
-                <!-- Tree will be rendered here -->
-                <div class="text-gray-500 mt-20">Select a package to view your team tree</div>
+                <div class="text-gray-500 mt-20 flex flex-col items-center">
+                    <i data-lucide="loader" class="animate-spin mb-2"></i>
+                    Connecting to Blockchain...
+                </div>
             </div>
         </div>
     </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <script src="components.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="web3-handler.js"></script>
-  <script>
+    <script>
         lucide.createIcons();
 
-        // 1. ट्री लोड करने का फंक्शन (अब यह web3-handler.js में भी होना चाहिए)
         window.loadTree = async function() {
             const selectElement = document.getElementById('packageSelect');
             const container = document.getElementById('treeContainer');
@@ -58,30 +62,30 @@
 
             const slot = selectElement.value;
             const user = await window.signer.getAddress();
-            container.innerHTML = "Loading...";
+            container.innerHTML = `<div class="text-gray-500 mt-20">Loading Tree Data...</div>`;
 
             try {
                 const members = await window.contract.getWorkingTree(user, slot);
                 
-                let html = `<ul><li><div class="node border-yellow-500 text-yellow-500">YOU<br>${user.substring(0,8)}...</div><ul class="flex gap-2 pt-4">`;
+                let html = `<ul><li><div class="node border-yellow-500 text-yellow-500 ring-2 ring-yellow-500/20">YOU<br>${user.substring(0,8)}...</div><ul class="flex gap-3 pt-6">`;
                 
                 if(members.length === 0) {
-                    html += `<li><div class="node bg-slate-800 border-dashed">No Members</div></li>`;
+                    html += `<li><div class="node bg-slate-900 border-dashed border-gray-600 text-gray-500">No Members</div></li>`;
                 } else {
                     members.forEach(m => {
-                        html += `<li><div class="node">${m.substring(0,8)}...</div></li>`;
+                        html += `<li><div class="node hover:bg-indigo-900 transition">${m.substring(0,8)}...</div></li>`;
                     });
                 }
                 
                 html += `</ul></li></ul>`;
                 container.innerHTML = html;
+                lucide.createIcons();
             } catch (err) {
                 console.error(err);
-                container.innerHTML = "<div class='text-red-500'>Error loading tree</div>";
+                container.innerHTML = "<div class='text-red-500 mt-20'>Error loading tree</div>";
             }
         }
 
-        // 2. ऑटोमैटिक लोड लॉजिक
         window.addEventListener('load', async () => {
             let timer = setInterval(async () => {
                 if (window.contract && window.signer) {
