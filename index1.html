@@ -19,6 +19,7 @@
 <body class="p-4 md:p-8">
 
     <div class="max-w-7xl mx-auto space-y-6">
+        <!-- Dashboard Content Same as before... -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="glass-luxury border-animate p-6 flex items-center justify-between">
                 <div>
@@ -68,9 +69,10 @@
 
     <script>
         lucide.createIcons();
+        window.uiReady = true; // मार्कर ताकि handler को पता चले कि HTML लोड हो गया है
+        
         const pkgs = [11, 22, 44, 88, 176, 352, 704, 1408, 2816, 5632];
         
-        // यह फंक्शन web3-handler.js से कॉल किया जाएगा
         window.renderPackages = function(purchasedArray) {
             const grid = document.getElementById('pkgGrid');
             grid.innerHTML = '';
