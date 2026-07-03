@@ -34,41 +34,52 @@
         lucide.createIcons();
 
         async function loadActiveDeposits() {
-            const grid = document.getElementById('deposits-grid');
-            try {
-                const address = await window.signer.getAddress();
-                // 1. कॉन्ट्रैक्ट से पैकेज डेटा फेच करें
-                const data = await window.contract.globalOrbitPurchaseDetails(address);
-                // data[0] = bool[10] (purchasedPackage), data[1] = uint256[10] (purchasedTimestamp)
-                
-                const packages = data[0];
-                const timestamps = data[1];
-                const pkgPrices = [11, 22, 44, 88, 176, 352, 704, 1408, 2816, 5632];
-                
-                let html = '';
-                let foundAny = false;
+    const grid = document.getElementById('deposits-grid');
+    const address = localStorage.getItem('userAddress');
 
-                for (let i = 0; i < 10; i++) {
-                    if (packages[i]) {
-                        foundAny = true;
-                        html += `
-                        <div class="glass-luxury border-animate p-6">
-                            <div class="flex justify-between items-center mb-4">
-                                <h3 class="font-orbit text-xl font-bold text-yellow-500">$${pkgPrices[i]}</h3>
-                                <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded">ACTIVE</span>
-                            </div>
-                            <p class="text-[10px] text-gray-400 uppercase">Activated On</p>
-                            <p class="text-xs font-bold">${new Date(timestamps[i] * 1000).toLocaleDateString()}</p>
-                        </div>`;
-                    }
-                }
+    if (!window.contract || !address) {
+        setTimeout(loadActiveDeposits, 1000);
+        return;
+    }
 
-                grid.innerHTML = foundAny ? html : `<div class="col-span-full text-center py-20 text-gray-600">No active packages found.</div>`;
-            } catch (err) {
-                console.error("Error loading packages:", err);
-                grid.innerHTML = `<div class="col-span-full text-center py-20 text-red-500">Error loading packages.</div>`;
+    try {
+        // आपके कॉन्ट्रैक्ट में मौजूद फंक्शन का इस्तेमाल
+        const data = await window.contract.globalOrbitPurchaseDetails(address);
+        
+        // data[0] = bool[10] (purchasedPackage)
+        // data[1] = uint256[10] (purchasedTimestamp)
+        const packages = data[0]; 
+        const timestamps = data[1];
+        
+        const pkgPrices = [11, 22, 44, 88, 176, 352, 704, 1408, 2816, 5632];
+        
+        let html = '';
+        let foundAny = false;
+
+        for (let i = 0; i < 10; i++) {
+            // अगर पैकेज खरीदा हुआ है (true)
+            if (packages[i] === true) {
+                foundAny = true;
+                html += `
+                <div class="glass-luxury border-animate p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-orbit text-xl font-bold text-yellow-500">$${pkgPrices[i]}</h3>
+                        <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded">ACTIVE</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 uppercase">Activated On</p>
+                    <p class="text-xs font-bold">${new Date(timestamps[i] * 1000).toLocaleDateString()}</p>
+                </div>`;
             }
         }
+
+        grid.innerHTML = foundAny ? html : `<div class="col-span-full text-center py-20 text-gray-600">No active packages found.</div>`;
+        
+        lucide.createIcons();
+    } catch (err) {
+        console.error("Error in loadActiveDeposits:", err);
+        grid.innerHTML = `<div class="col-span-full text-center py-20 text-red-500">Error loading data.</div>`;
+    }
+}
 
         window.addEventListener('load', () => setTimeout(loadActiveDeposits, 1500));
     </script>
