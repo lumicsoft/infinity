@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Active Deposits | Infinity Global</title>
+    <title>Active Packages | Infinity Global</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
@@ -13,7 +13,6 @@
         .glass-luxury { background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95)); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
         .border-animate { position: relative; background: linear-gradient(#0f172a, #0f172a) padding-box, linear-gradient(90deg, #7c3aed, #0ea5e9, #f59e0b, #7c3aed) border-box; border: 2px solid transparent; background-size: 300% 300%; animation: gradient-flow 6s ease infinite; }
         @keyframes gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-        .progress-bar-node { background: linear-gradient(90deg, #fbbf24, #b45309); height: 100%; transition: width 1s ease-in-out; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -21,34 +20,10 @@
     <div class="max-w-7xl mx-auto space-y-8">
         <a href="index1.html" class="text-indigo-400 flex items-center gap-2 font-bold uppercase text-xs hover:text-white transition">← Back to Dashboard</a>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="glass-luxury border-animate p-6 flex items-center justify-between">
-                <div><p class="text-[9px] text-gray-400 uppercase font-bold">Total Active Capital</p><h3 class="font-orbit text-2xl font-bold">$<span id="total-active-capital">0.00</span></h3></div>
-                <div class="bg-emerald-500/10 p-3 rounded-full text-emerald-400"><i data-lucide="database"></i></div>
-            </div>
-            <div class="glass-luxury border-animate p-6 flex items-center justify-between">
-                <div><p class="text-[9px] text-gray-400 uppercase font-bold">Daily Profit (0.23%)</p><h3 class="font-orbit text-2xl font-bold text-green-400">$<span id="total-daily-profit">0.00</span></h3></div>
-                <div class="bg-blue-500/10 p-3 rounded-full text-blue-400"><i data-lucide="trending-up"></i></div>
-            </div>
-        </div>
+        <h2 class="font-orbit text-2xl font-bold text-yellow-500 uppercase">My Active Packages</h2>
 
-        <h3 class="font-orbit text-lg text-yellow-500 uppercase">Live Mining Nodes</h3>
         <div id="deposits-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="col-span-full text-center py-10 text-gray-500">Syncing Nodes...</div>
-        </div>
-
-        <h3 class="font-orbit text-lg text-purple-500 uppercase">Purchase History</h3>
-        <div class="glass-luxury border-animate p-6">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm text-gray-400">
-                    <thead class="text-[10px] uppercase text-yellow-500 border-b border-slate-700">
-                        <tr><th class="p-4">Package/Amount</th><th class="p-4">Purchase Date</th><th class="p-4">Status</th></tr>
-                    </thead>
-                    <tbody id="history-table-body">
-                        <tr><td colspan="3" class="p-10 text-center">Loading History...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <div class="col-span-full text-center py-20 text-gray-500">Syncing Packages...</div>
         </div>
     </div>
 
@@ -56,45 +31,45 @@
     <script src="web3-handler.js"></script>
     <script>
         lucide.createIcons();
-        const DAILY_ROI = 0.23;
 
         async function loadActiveDeposits() {
             const grid = document.getElementById('deposits-grid');
-            const historyBody = document.getElementById('history-table-body');
-            const address = localStorage.getItem('userAddress');
-
             try {
-                // Nodes Fetching
-                const stakeCount = (await window.contract.getStakeCount(address)).toNumber();
-                let html = ''; let totalActive = 0;
+                const address = await window.signer.getAddress();
+                // 1. कॉन्ट्रैक्ट से पैकेज डेटा फेच करें
+                const data = await window.contract.globalOrbitPurchaseDetails(address);
+                // data[0] = bool[10] (purchasedPackage), data[1] = uint256[10] (purchasedTimestamp)
+                
+                const packages = data[0];
+                const timestamps = data[1];
+                const pkgPrices = [11, 22, 44, 88, 176, 352, 704, 1408, 2816, 5632];
+                
+                let html = '';
+                let foundAny = false;
 
-                for (let i = 0; i < stakeCount; i++) {
-                    const s = await window.contract.getStake(address, i);
-                    if (s.active) {
-                        const amt = parseFloat(ethers.utils.formatEther(s.amount));
-                        totalActive += amt;
+                for (let i = 0; i < 10; i++) {
+                    if (packages[i]) {
+                        foundAny = true;
                         html += `
                         <div class="glass-luxury border-animate p-6">
-                            <div class="flex justify-between mb-4"><h3 class="text-xl font-bold">$${amt.toFixed(2)}</h3><span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded">ACTIVE</span></div>
-                            <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden"><div class="progress-bar-node" style="width: 50%"></div></div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-orbit text-xl font-bold text-yellow-500">$${pkgPrices[i]}</h3>
+                                <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded">ACTIVE</span>
+                            </div>
+                            <p class="text-[10px] text-gray-400 uppercase">Activated On</p>
+                            <p class="text-xs font-bold">${new Date(timestamps[i] * 1000).toLocaleDateString()}</p>
                         </div>`;
                     }
                 }
-                grid.innerHTML = html || '<div class="col-span-full text-center py-10">No Active Nodes</div>';
-                document.getElementById('total-active-capital').innerText = totalActive.toFixed(2);
-                document.getElementById('total-daily-profit').innerText = (totalActive * (DAILY_ROI/100)).toFixed(2);
 
-                // History Fetching (Purchase Timestamp)
-                const user = await window.contract.getUserDetails(address);
-                // मान रहे हैं कि purchasedTimestamp array मौजूद है
-                const historyHtml = user.purchasedTimestamp.map((ts, i) => {
-                    if (ts > 0) return `<tr><td class="p-4">$${(user.purchasedPackage[i] ? 'Package' : 'Data')}</td><td class="p-4">${new Date(ts*1000).toLocaleDateString()}</td><td class="p-4 text-green-500">COMPLETED</td></tr>`;
-                }).join('');
-                historyBody.innerHTML = historyHtml;
-            } catch (err) { console.error(err); }
+                grid.innerHTML = foundAny ? html : `<div class="col-span-full text-center py-20 text-gray-600">No active packages found.</div>`;
+            } catch (err) {
+                console.error("Error loading packages:", err);
+                grid.innerHTML = `<div class="col-span-full text-center py-20 text-red-500">Error loading packages.</div>`;
+            }
         }
 
-        window.addEventListener('load', () => setTimeout(loadActiveDeposits, 1000));
+        window.addEventListener('load', () => setTimeout(loadActiveDeposits, 1500));
     </script>
 </body>
 </html>
