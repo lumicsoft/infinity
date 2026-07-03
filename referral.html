@@ -3,68 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team Report - Pro Max</title>
-    <link rel="stylesheet" href="style1.css">
+    <title>Team Report | Infinity Global</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { background: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+        .font-orbit { font-family: 'Orbitron', sans-serif; }
+        .glass-luxury { background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95)); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; }
+        .border-animate { position: relative; background: linear-gradient(#0f172a, #0f172a) padding-box, linear-gradient(90deg, #7c3aed, #0ea5e9, #f59e0b, #7c3aed) border-box; border: 2px solid transparent; background-size: 300% 300%; animation: gradient-flow 6s ease infinite; }
+        @keyframes gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="p-4 md:p-8">
 
-    <div id="nav-placeholder"></div>
-
-    <main class="max-w-7xl mx-auto space-y-6 relative z-10">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-            <div class="premium-card"><div class="inner-content stat-box">
-                <div class="flex items-center gap-3"><i data-lucide="users" class="text-green-500 w-6 h-6"></i><p class="label-text">Directs</p></div>
-                <h3 class="amount-text orbitron" id="direct-count">0</h3>
-            </div></div>
-            <div class="premium-card"><div class="inner-content stat-box">
-                <div class="flex items-center gap-3"><i data-lucide="network" class="text-emerald-500 w-6 h-6"></i><p class="label-text">Total Team</p></div>
-                <h3 class="amount-text orbitron" id="team-count">0</h3>
-            </div></div>
-            <div class="premium-card"><div class="inner-content stat-box">
-                <div class="flex items-center gap-3"><i data-lucide="banknote" class="text-yellow-600 w-6 h-6"></i><p class="label-text">Total Earned</p></div>
-                <h3 class="amount-text orbitron" id="total-earned">0.00</h3>
-            </div></div>
-            <div class="premium-card"><div class="inner-content stat-box">
-                <div class="flex items-center gap-3"><i data-lucide="user-plus" class="text-yellow-500 w-6 h-6"></i><p class="label-text">Ref Bonus</p></div>
-                <h3 class="amount-text orbitron" id="referral-earnings">0.00</h3>
-            </div></div>
-            <div class="premium-card"><div class="inner-content stat-box">
-                <div class="flex items-center gap-3"><i data-lucide="layers" class="text-purple-500 w-6 h-6"></i><p class="label-text">Level Income</p></div>
-                <h3 class="amount-text orbitron" id="level-earnings">0.00</h3>
-            </div></div>
-        </div>
-
-        <div class="premium-card">
-            <div class="inner-content !block py-8">
-                <div class="flex justify-between items-center mb-8 px-4">
-                    <h3 class="text-sm font-black orbitron uppercase italic text-yellow-500">Team Report</h3>
-                    <select id="levelSelect" onchange="loadLevelData(this.value)" class="bg-black/50 text-yellow-500 font-black orbitron text-xs p-2 rounded-lg border border-white/10 outline-none">
-                        <option value="1">Level 1</option><option value="2">Level 2</option><option value="3">Level 3</option>
-                        <option value="4">Level 4</option><option value="5">Level 5</option><option value="6">Level 6</option>
-                        <option value="7">Level 7</option><option value="8">Level 8</option><option value="9">Level 9</option><option value="10">Level 10</option>
-                    </select>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="luxury-table w-full">
-                        <thead><tr class="text-left text-[10px] text-gray-500 uppercase"><th class="p-4">USER ADDRESS</th><th class="p-4">LEVEL</th><th class="p-4">TOTAL STAKE</th><th class="p-4">STATUS</th></tr></thead>
-                        <tbody id="team-table-body" class="text-gray-400"><tr><td colspan="4" class="p-10 text-center italic text-gray-600">Syncing Network...</td></tr></tbody>
-                    </table>
-                </div>
+    <div class="max-w-7xl mx-auto space-y-6">
+        <a href="index1.html" class="text-indigo-400 flex items-center gap-2 mb-4 font-bold uppercase text-xs hover:text-white transition">← Back to Dashboard</a>
+        
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <div class="glass-luxury border-animate p-4 flex flex-col items-center justify-center text-center">
+                <i data-lucide="users" class="text-emerald-500 w-6 h-6 mb-2"></i>
+                <p class="text-[9px] text-gray-400 uppercase font-bold">Directs</p>
+                <h3 id="direct-count" class="font-orbit text-lg font-bold">0</h3>
+            </div>
+            <div class="glass-luxury border-animate p-4 flex flex-col items-center justify-center text-center">
+                <i data-lucide="network" class="text-blue-500 w-6 h-6 mb-2"></i>
+                <p class="text-[9px] text-gray-400 uppercase font-bold">Total Team</p>
+                <h3 id="team-count" class="font-orbit text-lg font-bold">0</h3>
+            </div>
+            <div class="glass-luxury border-animate p-4 flex flex-col items-center justify-center text-center">
+                <i data-lucide="banknote" class="text-yellow-600 w-6 h-6 mb-2"></i>
+                <p class="text-[9px] text-gray-400 uppercase font-bold">Total Earned</p>
+                <h3 id="total-earned" class="font-orbit text-lg font-bold">0.00</h3>
+            </div>
+            <div class="glass-luxury border-animate p-4 flex flex-col items-center justify-center text-center">
+                <i data-lucide="user-plus" class="text-yellow-500 w-6 h-6 mb-2"></i>
+                <p class="text-[9px] text-gray-400 uppercase font-bold">Ref Bonus</p>
+                <h3 id="referral-earnings" class="font-orbit text-lg font-bold">0.00</h3>
+            </div>
+            <div class="glass-luxury border-animate p-4 flex flex-col items-center justify-center text-center">
+                <i data-lucide="layers" class="text-purple-500 w-6 h-6 mb-2"></i>
+                <p class="text-[9px] text-gray-400 uppercase font-bold">Level Inc.</p>
+                <h3 id="level-earnings" class="font-orbit text-lg font-bold">0.00</h3>
             </div>
         </div>
-    </main>
+
+        <div class="glass-luxury border-animate p-8">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="font-orbit text-xl font-bold text-yellow-500 uppercase">Team Report</h3>
+                <select id="levelSelect" onchange="loadLevelData(this.value)" class="bg-slate-900 text-yellow-500 font-bold orbitron text-[10px] p-2 rounded-lg border border-slate-700 outline-none">
+                    <option value="1">Level 1</option><option value="2">Level 2</option><option value="3">Level 3</option>
+                    <option value="4">Level 4</option><option value="5">Level 5</option><option value="6">Level 6</option>
+                    <option value="7">Level 7</option><option value="8">Level 8</option><option value="9">Level 9</option><option value="10">Level 10</option>
+                </select>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-400">
+                    <thead class="text-[10px] uppercase text-gray-500 border-b border-slate-700">
+                        <tr>
+                            <th class="p-4">User Address</th>
+                            <th class="p-4">Level</th>
+                            <th class="p-4">Total Stake</th>
+                            <th class="p-4">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="team-table-body" class="text-white text-xs">
+                        <tr><td colspan="4" class="p-10 text-center italic text-gray-600">Syncing Network...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <script src="components.js"></script> 
+    <script src="components.js"></script>
     <script src="web3-handler.js"></script>
     
     <script>
         lucide.createIcons();
 
-        // 1. `format` hata diya yahan se kyunki web3-handler mein define hai
         async function loadReferralData() {
             if (typeof window.contract === 'undefined') {
                 setTimeout(loadReferralData, 1000); return;
@@ -85,36 +103,35 @@
         }
 
         async function loadLevelData(level) {
-    const tableBody = document.getElementById('team-table-body');
-    tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-yellow-500">SYNCING LEVEL ${level}...</td></tr>`;
-    
-    try {
-        const address = await window.signer.getAddress();
-        
-        // Yahan 'level' ko pass karna zaroori hai kyunki ab contract 2 arguments leta hai
-        const [wallets, stakes] = await window.contract.getTeamByLevel(address, level);
-        
-        if (!wallets || wallets.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-gray-600">No members at Level ${level}</td></tr>`;
-            return;
-        }
+            const tableBody = document.getElementById('team-table-body');
+            tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-yellow-500">SYNCING LEVEL ${level}...</td></tr>`;
+            
+            try {
+                const address = await window.signer.getAddress();
+                const [wallets, stakes] = await window.contract.getTeamByLevel(address, level);
+                
+                if (!wallets || wallets.length === 0) {
+                    tableBody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-gray-600">No members at Level ${level}</td></tr>`;
+                    return;
+                }
 
-        let html = '';
-        for (let i = 0; i < wallets.length; i++) {
-            const activeAmt = parseFloat(ethers.utils.formatUnits(stakes[i], 18));
-            html += `<tr>
-                <td class="p-4 font-mono text-yellow-500">${wallets[i].substring(0,6)}...${wallets[i].substring(38)}</td>
-                <td class="p-4">Lvl ${level}</td>
-                <td class="p-4">$${activeAmt.toLocaleString()}</td>
-                <td class="p-4">${activeAmt > 0 ? '<span class="text-green-500">ACTIVE</span>' : '<span class="text-red-500">INACTIVE</span>'}</td>
-            </tr>`;
+                let html = '';
+                for (let i = 0; i < wallets.length; i++) {
+                    const activeAmt = parseFloat(ethers.utils.formatUnits(stakes[i], 18));
+                    html += `
+                        <tr class="border-b border-slate-700 hover:bg-slate-800/50 transition">
+                            <td class="p-4 font-mono text-indigo-400">${wallets[i].substring(0,6)}...${wallets[i].substring(38)}</td>
+                            <td class="p-4 font-bold">Lvl ${level}</td>
+                            <td class="p-4">$${activeAmt.toLocaleString()}</td>
+                            <td class="p-4">${activeAmt > 0 ? '<span class="text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-md text-[9px]">ACTIVE</span>' : '<span class="text-red-500 bg-red-500/10 px-2 py-1 rounded-md text-[9px]">INACTIVE</span>'}</td>
+                        </tr>`;
+                }
+                tableBody.innerHTML = html;
+            } catch (err) { 
+                console.error("Error:", err);
+                tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Error Loading Level ${level}</td></tr>`; 
+            }
         }
-        tableBody.innerHTML = html;
-    } catch (err) { 
-        console.error("Error loading level data:", err);
-        tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Error Loading Level ${level}</td></tr>`; 
-    }
-}
 
         window.addEventListener('load', () => setTimeout(loadReferralData, 1500));
     </script>
