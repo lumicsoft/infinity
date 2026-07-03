@@ -493,6 +493,15 @@ async function fetchAndDisplayData() {
         if (typeof window.fetchAllData === 'function') {
             await window.fetchAllData(userAddress);
         }
+ try {
+            const purchaseData = await window.contract.globalOrbitPurchaseDetails(address);
+            // purchaseData[0] = bool[10] (purchasedPackage)
+            if (window.renderPackages) {
+                window.renderPackages(purchaseData[0]);
+            }
+        } catch (e) {
+            console.error("Package status load error:", e);
+        }
 
         // 2. Contract se data layein
         const stats = await window.contract.getUserStats(userAddress);
