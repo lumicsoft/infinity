@@ -83,24 +83,31 @@
     <script>
         lucide.createIcons();
 
-       async function loadReferralData() {
+      async function loadReferralData() {
     if (!window.contract) return;
     try {
         const address = await window.signer.getAddress();
         
-        // कॉन्ट्रैक्ट से डेटा फेच करें
+        // कॉन्ट्रैक्ट से डेटा फेच करें (यह एक Array रिटर्न करेगा)
         const user = await window.contract.getUserDetails(address);
-        // user[7] = totalDirect, user[8] = noOfTotalTeam
+        // user[7] = totalDirect, user[8] = noOfTotalTeam (इंडेक्सिंग के अनुसार)
         
-        document.getElementById('direct-count').innerText = user.totalDirect.toString();
-        document.getElementById('team-count').innerText = user.noOfTotalTeam.toString();
+        document.getElementById('direct-count').innerText = user[7].toString();
+        document.getElementById('team-count').innerText = user[8].toString();
         
-        // रिवॉर्ड्स का डेटा
-        const rewards = await window.contract.reward_details(address);
-        // रिवॉर्ड्स का योग निकालें (अगर जरुरत हो)
+        // बोनस वॉलेट डेटा
+        const bonus = await window.contract.userBonusUSDTWallet(address);
+        // bonus[3] = totalCreditedBonus, [0] = referralBonus, [1] = activeorbitBonus
+        
+        const format = (val) => ethers.utils.formatEther(val.toString());
+        document.getElementById('total-earned').innerText = format(bonus[3]);
+        document.getElementById('referral-earnings').innerText = format(bonus[0]);
+        document.getElementById('level-earnings').innerText = format(bonus[1]);
         
         loadLevelData(1);
-    } catch (err) { console.error("Referral Error:", err); }
+    } catch (err) { 
+        console.error("Referral Error:", err); 
+    }
 }
 
 async function loadLevelData(level) {
@@ -109,8 +116,7 @@ async function loadLevelData(level) {
     
     try {
         const address = await window.signer.getAddress();
-        // आपके कॉन्ट्रैक्ट में getFetchLevel(user, slot, level) है
-        // नोट: यहाँ slot 0 मान रहे हैं, इसे अपनी जरुरत अनुसार बदलें
+        // लेवल 1 के लिए इंडेक्स 0 होगा, इसलिए (level - 1)
         const members = await window.contract.getFetchLevel(address, 0, parseInt(level) - 1);
         
         if (!members || members.length === 0) {
@@ -120,21 +126,21 @@ async function loadLevelData(level) {
 
         let html = '';
         for (let i = 0; i < members.length; i++) {
-            // हर मेम्बर का स्टेटस चेक करें
             const memberDetails = await window.contract.getUserDetails(members[i]);
-            const isPurchased = memberDetails.totalSelfPurchasing > 0;
+            // memberDetails[3] = totalSelfPurchasing
+            const isPurchased = memberDetails[3].gt(0); 
             
             html += `<tr>
                 <td class="p-4 font-mono text-yellow-500">${members[i].substring(0,6)}...${members[i].substring(38)}</td>
                 <td class="p-4">Lvl ${level}</td>
-                <td class="p-4">$${(memberDetails.totalSelfPurchasing / 1e18).toFixed(2)}</td>
+                <td class="p-4">$${parseFloat(ethers.utils.formatEther(memberDetails[3])).toFixed(2)}</td>
                 <td class="p-4">${isPurchased ? '<span class="text-green-500">ACTIVE</span>' : '<span class="text-red-500">INACTIVE</span>'}</td>
             </tr>`;
         }
         tableBody.innerHTML = html;
     } catch (err) { 
-        console.error("Error loading level data:", err);
-        tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Error Loading Level</td></tr>`; 
+        console.error("Error:", err);
+        tableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-red-500">Error Loading Data</td></tr>`; 
     }
 }
 
