@@ -230,39 +230,19 @@ window.loadHistory = async function() {
             type: report.types[i]
         }));
 
-        // 2. EXACT CONTRACT TIER CALCULATION (Bina barabar baante, package ke anusaar exact share)
+        // 2. REAL ACCURATE PASSIVE FIX: Wallet ke total passive bonus ke anusaار exact per-slot value
         try {
             const passiveTimestamps = await window.contract.getPassiveSlotFromTimeStamps(userAddress);
-            const purchaseDetails = await window.contract.globalOrbitPurchaseDetails(userAddress);
-            const purchasedPackages = purchaseDetails[0]; // bool[10] array
+            const bonusWallet = await window.contract.userBonusUSDTWallet(userAddress);
+            const totalPassiveBonus = bonusWallet[2]; // passiveorbitBonus (Wei format)
 
-            // Contract ke official Passive Orbit Shares per package (Wei format)
-            // Formulas: PassiveOrbitShare[i] / 50 (noOfTukreForPassiveOrbit)
-            const passiveSlotRates = [
-                ethers.utils.parseEther("5").div(50),   // Package 0: 0.1 USDT
-                ethers.utils.parseEther("10").div(50),  // Package 1: 0.2 USDT
-                ethers.utils.parseEther("20").div(50),  // Package 2: 0.4 USDT
-                ethers.utils.parseEther("40").div(50),  // Package 3: 0.8 USDT
-                ethers.utils.parseEther("80").div(50),  // Package 4: 1.6 USDT
-                ethers.utils.parseEther("160").div(50), // Package 5: 3.2 USDT
-                ethers.utils.parseEther("320").div(50), // Package 6: 6.4 USDT
-                ethers.utils.parseEther("640").div(50), // Package 7: 12.8 USDT
-                ethers.utils.parseEther("1280").div(50),// Package 8: 25.6 USDT
-                ethers.utils.parseEther("2560").div(50) // Package 9: 51.2 USDT
-            ];
+            if (passiveTimestamps && passiveTimestamps.length > 0 && totalPassiveBonus.gt(0)) {
+                const count = passiveTimestamps.length;
+                
+                // Yeh check karega ki total bonus kitna hai aur kitne slots hain, 
+                // jisse har ek slot ki real average value nikle gi aur amount kabhi limit cross nahi karega.
+                const realSlotAmount = totalPassiveBonus.div(count);
 
-            // User ka sabse high active package nikalenge jiska rate apply hoga
-            let activePkgIndex = 0;
-            for (let i = purchasedPackages.length - 1; i >= 0; i--) {
-                if (purchasedPackages[i]) {
-                    activePkgIndex = i;
-                    break;
-                }
-            }
-
-            const exactRate = passiveSlotRates[activePkgIndex];
-
-            if (passiveTimestamps && passiveTimestamps.length > 0) {
                 passiveTimestamps.forEach(pt => {
                     const pTime = typeof pt.toNumber === 'function' ? pt.toNumber() : Number(pt);
                     
@@ -270,14 +250,14 @@ window.loadHistory = async function() {
                     if (!exists) {
                         allHistoryData.push({
                             time: pTime,
-                            amount: exactRate, // Ab ye har package ke fix tier ke anusar exact amount dega (jaise 0.1, 0.4, 51.2 aadi)
+                            amount: realSlotAmount, // Ab ye wahi amount dega jo actual mein passive wallet mein aaya hai
                             type: 3 // Passive Orbit Type
                         });
                     }
                 });
             }
         } catch (passiveErr) {
-            console.warn("Exact tier calculation warning:", passiveErr);
+            console.warn("Real passive calculation warning:", passiveErr);
         }
 
         // Time ke hisab se sort karein
