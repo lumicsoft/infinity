@@ -230,37 +230,37 @@ window.loadHistory = async function() {
             type: report.types[i]
         }));
 
-        // 2. LIVE EXACT PER-SLOT FIX: Contract ke official share ke mutabiq exact amount
+        // 2. EXACT CONTRACT TIER CALCULATION (Bina barabar baante, package ke anusaar exact share)
         try {
             const passiveTimestamps = await window.contract.getPassiveSlotFromTimeStamps(userAddress);
             const purchaseDetails = await window.contract.globalOrbitPurchaseDetails(userAddress);
             const purchasedPackages = purchaseDetails[0]; // bool[10] array
 
-            // Contract ke mutabiq Passive Orbit Shares (Wei format)
-            const passiveShares = [
-                ethers.utils.parseEther("5"),
-                ethers.utils.parseEther("10"),
-                ethers.utils.parseEther("20"),
-                ethers.utils.parseEther("40"),
-                ethers.utils.parseEther("80"),
-                ethers.utils.parseEther("160"),
-                ethers.utils.parseEther("320"),
-                ethers.utils.parseEther("640"),
-                ethers.utils.parseEther("1280"),
-                ethers.utils.parseEther("2560")
+            // Contract ke official Passive Orbit Shares per package (Wei format)
+            // Formulas: PassiveOrbitShare[i] / 50 (noOfTukreForPassiveOrbit)
+            const passiveSlotRates = [
+                ethers.utils.parseEther("5").div(50),   // Package 0: 0.1 USDT
+                ethers.utils.parseEther("10").div(50),  // Package 1: 0.2 USDT
+                ethers.utils.parseEther("20").div(50),  // Package 2: 0.4 USDT
+                ethers.utils.parseEther("40").div(50),  // Package 3: 0.8 USDT
+                ethers.utils.parseEther("80").div(50),  // Package 4: 1.6 USDT
+                ethers.utils.parseEther("160").div(50), // Package 5: 3.2 USDT
+                ethers.utils.parseEther("320").div(50), // Package 6: 6.4 USDT
+                ethers.utils.parseEther("640").div(50), // Package 7: 12.8 USDT
+                ethers.utils.parseEther("1280").div(50),// Package 8: 25.6 USDT
+                ethers.utils.parseEther("2560").div(50) // Package 9: 51.2 USDT
             ];
 
-            // User ka sabse high active package nikalein jisse exact per-slot share mile
-            let highestActivePkg = 0;
+            // User ka sabse high active package nikalenge jiska rate apply hoga
+            let activePkgIndex = 0;
             for (let i = purchasedPackages.length - 1; i >= 0; i--) {
                 if (purchasedPackages[i]) {
-                    highestActivePkg = i;
+                    activePkgIndex = i;
                     break;
                 }
             }
 
-            // Contract formula: eachSeatBonus = PassiveOrbitShare[packageId] / 50
-            const exactSlotAmount = passiveShares[highestActivePkg].div(50);
+            const exactRate = passiveSlotRates[activePkgIndex];
 
             if (passiveTimestamps && passiveTimestamps.length > 0) {
                 passiveTimestamps.forEach(pt => {
@@ -270,17 +270,17 @@ window.loadHistory = async function() {
                     if (!exists) {
                         allHistoryData.push({
                             time: pTime,
-                            amount: exactSlotAmount, // Ab yeh har slot ke liye exact contract-defined value dega
+                            amount: exactRate, // Ab ye har package ke fix tier ke anusar exact amount dega (jaise 0.1, 0.4, 51.2 aadi)
                             type: 3 // Passive Orbit Type
                         });
                     }
                 });
             }
         } catch (passiveErr) {
-            console.warn("Exact per-slot calculation warning:", passiveErr);
+            console.warn("Exact tier calculation warning:", passiveErr);
         }
 
-        // Time ke hisab से sort karein
+        // Time ke hisab se sort karein
         allHistoryData.sort((a, b) => a.time - b.time);
 
         window.filterHistory(0);
@@ -292,7 +292,6 @@ window.loadHistory = async function() {
         </td></tr>`;
     }
 }
-
 window.filterHistory = function(filterType) {
     const tbody = document.getElementById('historyBody');
     if (!tbody) return;
