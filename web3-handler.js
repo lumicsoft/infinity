@@ -230,13 +230,13 @@ window.loadHistory = async function() {
             type: report.types[i]
         }));
 
-        // 2. LIVE EXACT FIX: Passive income ko exact package share ke hisab se map karein
+        // 2. LIVE EXACT PER-SLOT FIX: Contract ke official share ke mutabiq exact amount
         try {
             const passiveTimestamps = await window.contract.getPassiveSlotFromTimeStamps(userAddress);
             const purchaseDetails = await window.contract.globalOrbitPurchaseDetails(userAddress);
-            const purchasedPackages = purchaseDetails[0]; // bool[10] array of packages
+            const purchasedPackages = purchaseDetails[0]; // bool[10] array
 
-            // Contract ke mutabiq Passive Orbit Shares per package (Wei format mein)
+            // Contract ke mutabiq Passive Orbit Shares (Wei format)
             const passiveShares = [
                 ethers.utils.parseEther("5"),
                 ethers.utils.parseEther("10"),
@@ -250,42 +250,39 @@ window.loadHistory = async function() {
                 ethers.utils.parseEther("2560")
             ];
 
-            // Sabse bada active package find karein jisse exact per-slot amount nikal sake
-            let activePackageIndex = 0;
-            for (let p = purchasedPackages.length - 1; p >= 0; p--) {
-                if (purchasedPackages[p]) {
-                    activePackageIndex = p;
+            // User ka sabse high active package nikalein jisse exact per-slot share mile
+            let highestActivePkg = 0;
+            for (let i = purchasedPackages.length - 1; i >= 0; i--) {
+                if (purchasedPackages[i]) {
+                    highestActivePkg = i;
                     break;
                 }
             }
 
             // Contract formula: eachSeatBonus = PassiveOrbitShare[packageId] / 50
-            const totalShareForPackage = passiveShares[activePackageIndex];
-            const exactAmountPerSlot = totalShareForPackage.div(50); // 50 tukre hote hain contract ke mutabiq
+            const exactSlotAmount = passiveShares[highestActivePkg].div(50);
 
             if (passiveTimestamps && passiveTimestamps.length > 0) {
                 passiveTimestamps.forEach(pt => {
                     const pTime = typeof pt.toNumber === 'function' ? pt.toNumber() : Number(pt);
                     
-                    // Check karein ki ye timestamp pehle se list me hai ya nahi
                     const exists = allHistoryData.some(item => item.time === pTime && item.type === 3);
                     if (!exists) {
                         allHistoryData.push({
                             time: pTime,
-                            amount: exactAmountPerSlot, // Ab yeh exact har slot ka original amount dikhayega
+                            amount: exactSlotAmount, // Ab yeh har slot ke liye exact contract-defined value dega
                             type: 3 // Passive Orbit Type
                         });
                     }
                 });
             }
         } catch (passiveErr) {
-            console.warn("Passive exact calculation warning:", passiveErr);
+            console.warn("Exact per-slot calculation warning:", passiveErr);
         }
 
-        // Time ke hisab se sort karein
+        // Time ke hisab से sort karein
         allHistoryData.sort((a, b) => a.time - b.time);
 
-        // Filter call karein taaki table update ho jaye
         window.filterHistory(0);
         
     } catch (err) {
@@ -295,6 +292,7 @@ window.loadHistory = async function() {
         </td></tr>`;
     }
 }
+
 window.filterHistory = function(filterType) {
     const tbody = document.getElementById('historyBody');
     if (!tbody) return;
