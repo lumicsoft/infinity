@@ -211,31 +211,56 @@ window.loadHistory = async function() {
     if (!tbody) return;
     
     try {
-        // 1. अगर कॉन्ट्रैक्ट लोड नहीं है, तो पहले init() चलाएं
         if (!window.contract) {
-            console.log("Contract not found, initializing...");
             await init(); 
         }
 
-        // 2. पक्का करें कि कॉन्ट्रैक्ट और साइनर तैयार हैं
         if (!window.contract || !window.signer) {
             throw new Error("Wallet not connected");
         }
 
-        // 3. यूजर एड्रेस लें
         const userAddress = await window.signer.getAddress();
         
-        // 4. कॉन्ट्रैक्ट से डेटा लाएं
+        // 1. Normal reward report fetch karein (Referral, Active, Single Leg etc.)
         const report = await window.contract.getUserIncomeReport(userAddress);
         
-        // 5. डेटा प्रोसेस करें (ध्यान दें: t.toNumber() की जगह t का इस्तेमाल करें अगर वह BN है)
         allHistoryData = report.timestamps.map((t, i) => ({
             time: typeof t.toNumber === 'function' ? t.toNumber() : Number(t),
             amount: report.amounts[i],
             type: report.types[i]
         }));
-        
-        // 6. फिल्टर कॉल करें
+
+        // 2. LIVE FIX: Contract se passive timestamps aur total balance laayein
+        try {
+            const passiveTimestamps = await window.contract.getPassiveSlotFromTimeStamps(userAddress);
+            const bonusWallet = await window.contract.userBonusUSDTWallet(userAddress);
+            const totalPassiveBonus = bonusWallet[2]; // passiveorbitBonus index 2 par hai
+
+            if (passiveTimestamps && passiveTimestamps.length > 0 && totalPassiveBonus.gt(0)) {
+                // Har ek passive slot par barabar amount divide karke entry banayein
+                const amountPerSlot = totalPassiveBonus.div(passiveTimestamps.length);
+
+                passiveTimestamps.forEach(pt => {
+                    const pTime = typeof pt.toNumber === 'function' ? pt.toNumber() : Number(pt);
+                    // Check karein ki ye timestamp pehle se list me hai ya nahi
+                    const exists = allHistoryData.some(item => item.time === pTime && item.type === 3);
+                    if (!exists) {
+                        allHistoryData.push({
+                            time: pTime,
+                            amount: amountPerSlot,
+                            type: 3 // Passive Orbit Type
+                        });
+                    }
+                });
+            }
+        } catch (passiveErr) {
+            console.warn("Passive timestamp fetch warning:", passiveErr);
+        }
+
+        // Time ke hisab se sort karein
+        allHistoryData.sort((a, b) => a.time - b.time);
+
+        // Filter call karein taaki table update ho jaye
         window.filterHistory(0);
         
     } catch (err) {
