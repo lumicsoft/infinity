@@ -247,25 +247,49 @@ window.loadHistory = async function() {
 }
 window.filterHistory = function(filterType) {
     const tbody = document.getElementById('historyBody');
-    const typeNames = ["", "Referral", "Active", "Passive", "Passive Gift", "Team Gift", "Direct Gift", "Single Leg"];
+    if (!tbody) return;
 
+    // Smart contract ke reward_type mapping ke anusaar exact names
+    const typeNames = [
+        "",                 // 0
+        "Referral",         // 1
+        "Active Orbit",     // 2
+        "Passive Orbit",    // 3
+        "Passive Gift",     // 4
+        "Team Gift",        // 5
+        "Direct Gift",      // 6
+        "Single Leg",       // 7
+        "",                 // 8
+        "",                 // 9
+        "Withdrawal"        // 10
+    ];
+
+    // Agar filterType 0 hai toh sabhi dikhayein, nahi toh specific match karein
     const filtered = filterType === 0 
         ? allHistoryData 
-        : allHistoryData.filter(item => item.type === filterType);
+        : allHistoryData.filter(item => {
+            // Agar user ne 'Passive' (Type 3) select kiya hai, toh Type 3 aur 4 dono show honge
+            if (filterType === 3) {
+                return item.type === 3 || item.type === 4;
+            }
+            return item.type === filterType;
+        });
 
     if (filtered.length === 0) {
-        tbody.innerHTML = "<tr><td colspan='3' class='text-center py-10'>No record found</td></tr>";
+        tbody.innerHTML = "<tr><td colspan='3' class='text-center py-10 text-gray-400'>No record found</td></tr>";
         return;
     }
 
     tbody.innerHTML = "";
-    // डेटा को उल्टा करें ताकि लेटेस्ट ऊपर दिखे
+    // Latest data upar dikhane ke liye reverse karein
     filtered.slice().reverse().forEach(item => {
-        const time = new Date(item.time * 1000).toLocaleDateString();
+        const time = new Date(item.time * 1000).toLocaleString();
         const amount = ethers.utils.formatEther(item.amount);
+        const typeLabel = typeNames[item.type] || "Income";
+
         tbody.innerHTML += `
             <tr class="border-b border-slate-700">
-                <td class="py-3 px-2 text-white">${typeNames[item.type] || "Income"}</td>
+                <td class="py-3 px-2 text-white">${typeLabel}</td>
                 <td class="py-3 px-2 text-emerald-400 font-bold">${parseFloat(amount).toFixed(2)} USDT</td>
                 <td class="py-3 px-2 text-gray-400 text-xs">${time}</td>
             </tr>
